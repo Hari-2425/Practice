@@ -317,6 +317,157 @@ long long minOperationsToMakeMedianK(vector<int>& nums, int k) {
     return ans;
 }
 
+
+vector<vector<string>> groupAnagrams(vector<string>& strs) {
+    unordered_map<string, vector<string>> mp;
+    vector<vector<string>> res;
+    for(int i=0;i<strs.size();i++){
+        vector<int> arr(26, 0);
+        string curr = strs[i];
+        sort(curr.begin(), curr.end());
+        mp[curr].push_back(strs[i]);
+    }
+    for(auto it: mp){
+        res.push_back(it.second);
+    }
+    return res;
+}
+
+vector<int> topKFrequent(vector<int>& nums, int k) {
+    int n = nums.size();
+    vector<int> ans;
+    unordered_map<int, int> count;
+    for(int i=0;i<n;i++){
+        count[i]++;
+    }
+    priority_queue<pair<int, int>, vector<pair<int, int>>> pq;
+    for(auto it: count){
+        pq.push({-1*it.second, it.first});
+    }
+    while(k){
+        pair<int, int> tp = pq.top();
+        ans.push_back(tp.second);
+        pq.pop();
+    }
+    return ans;
+}
+
+int longestConsecutive(vector<int>& nums) {
+    if(nums.size()==0) return 0;
+    unordered_set<int> us;
+    for(int i=0;i<nums.size();i++){
+        us.insert(nums[i]);
+    }
+    int ans = INT_MIN;
+    for(auto it: us){
+        int x = it;
+        
+        if(us.find(x-1)==us.end()){
+            int cnt = 0;
+            while (us.find(x+1)!=us.end())
+            {
+                cnt++;
+                x++;
+            }
+            ans = max(ans, cnt);
+        }
+        
+    }
+    return ans;
+}
+
+vector<vector<int>> threeSum(vector<int>& nums) {
+    int n = nums.size();
+    if(n < 3){
+        return {};
+    }
+    // unordered_map<int, int> count;
+    // for(auto it: nums){
+    //     count[it]++;
+    // }
+    unordered_set<int> count;
+    vector<vector<int>> ans;
+    set<vector<int>> hs;
+    for(int i=0;i<n;i++){
+        for(int j=i+1;j<n;j++){
+            vector<int> tmp;
+            // count[nums[i]]--;
+            // count[nums[j]]--;
+            int el = 0 - (nums[i]+nums[j]);
+            if(count.find(el) != count.end()){
+                tmp = {nums[i], nums[j], el};
+                sort(tmp.begin(), tmp.end());
+                hs.insert(tmp);
+            }
+            count.insert(nums[j]);
+            // count[nums[i]]++;
+            // count[nums[j]]++;
+        }
+    }
+    for(auto it: hs){
+        ans.push_back(it);
+    }
+    return ans;
+}
+
+int maxArea(vector<int>& heights) {
+    int n=heights.size();
+    int l=0, r=n-1, ans=0;
+    int lMax=heights[0], rMax=heights[n-1];
+    while(l<=r){
+        if(heights[l] <= heights[r]){
+            if(heights[l] < lMax){
+                ans += lMax-heights[l];
+            }
+            else{
+                lMax = heights[l];
+            }
+            l++;
+        }
+        else{
+            if(heights[r] < rMax){
+                ans += rMax-heights[r];
+            }
+            else{
+                rMax = heights[r];
+            }
+            r--;
+        }
+    }
+    return ans;
+}
+
+int maxProfit(vector<int>& prices) {
+    int minP = INT_MAX;
+    int ans = 0;
+    for(int i=0;i<prices.size();i++){
+        minP = min(minP, prices[i]);
+        ans = max(ans, prices[i]-minP);
+    }
+    return ans;
+}
+
+int lengthOfLongestSubstring(string s) {
+    int n = s.size();
+    int left=0, right=0, ans=INT_MIN;
+    unordered_set<char> count;
+    while(right < n){
+        char ch = s[right];
+        
+        if(count.find(ch) != count.end()){
+            ans = max(ans, (right-left));
+            while (count.find(ch) != count.end())
+            {
+                count.erase(s[left]);
+                left++;
+            }
+        }
+        count.insert(ch);
+        right++;
+    }
+    return ans;
+}
+
 int main(){
     
     priority_queue<int> qu;
