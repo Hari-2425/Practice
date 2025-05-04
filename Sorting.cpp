@@ -196,11 +196,21 @@ void ShellSort(int arr[], int n){
 }
 
 int main(){
-    vector<int> arr = {64, 34, 25, 12, 22, 11, 90};
+    vector<int> arr = {3, 4, 4, 7, 8, 10};
     sort(arr.begin(), arr.end());
     for(auto it: arr){
         cout<<it<<" ";
     }
     cout<<endl;
-    cout<<arr[upper_bound(arr.begin(), arr.end(), 13)-arr.begin()];
+    int target = 8;
+    auto it = lower_bound(arr.begin(), arr.end(), target);
+    if(it != arr.end()){
+        if(arr[it-arr.begin()]>target){
+            cout<<"Floor: "<<arr[it-arr.begin()-1]<<endl;
+        }
+        else{
+            cout<<"Floor: "<<arr[it-arr.begin()]<<endl;
+        }
+        cout<<"Ceil: "<<arr[it-arr.begin()]<<endl;
+    }
 }
