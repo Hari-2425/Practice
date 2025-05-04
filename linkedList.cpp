@@ -267,29 +267,124 @@ bool isPalindrome(Node* head){
     return true;
 }
 
+// Node* Merge(Node* left, Node* right){
+//     if(left == nullptr)
+//         return right;
+//     if(right == nullptr)
+//         return left;
+//     Node *head = nullptr;
+//     if(left->data <= right->data){
+//         head = left;
+//         left = left->next;
+//     }
+//     else{
+//         head = right;
+//         right = right->next;
+//     }
+//     Node *curr = head;
+//     while (left != nullptr && right != nullptr)
+//     {
+//         if(left->data <= right->data){
+//             curr->next = left;
+//             curr = curr->next;
+//             left = left->next;
+//         }
+//         else{
+//             curr->next = right;
+//             curr = curr->next;
+//             right = right->next;
+//         }
+//     }
+//     if(left != nullptr){
+//         curr->next = left;
+//     }
+//     else{
+//         curr->next = right;
+//     }
+//     return head;
+// }
+// Node* MergeSort(Node* head){
+//     if(head == nullptr || head->next == nullptr)
+//         return head;
+//     Node *slow, *fast;
+//     slow = fast = head;
+//     while (fast->next != nullptr && fast->next->next != nullptr)
+//     {
+//         slow = slow->next;
+//         fast = fast->next->next;
+//     }
+//     Node* tmp = slow->next;
+//     slow->next = nullptr;
+//     Node* left = MergeSort(head);
+//     Node* right = MergeSort(tmp);
+//     return Merge(left, right);
+// }
+
+Node* merge(Node* left, Node* right){
+    if(left == nullptr)
+        return right;
+    if(right == nullptr)
+        return left;
+    Node *curr, *res;
+    res = nullptr;
+    if(left->data <= right->data){
+        res = left;
+        left = left->next;
+    }
+    else{
+        res = right;
+        right = right->next;
+    }
+    curr = res;
+    while (left!=nullptr && right!=nullptr)
+    {
+        if(left->data <= right->data){
+            curr->next = left;
+            left = left->next;
+        }
+        else{
+            curr->next = right;
+            right = right->next;
+        }
+        curr = curr->next;
+    }
+    
+    if (left != nullptr)
+    {
+        curr->next = left;
+    }
+    if (right != nullptr)
+    {
+        curr->next = right;
+    }
+    return res;
+}
+
+Node* mergeSort(Node* head){
+    if(head==nullptr || head->next==nullptr)
+        return head;
+    Node *slow, *fast;
+    slow = fast = head;
+    while (fast->next!=nullptr && fast->next->next!=nullptr)
+    {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    Node* tmp = slow->next;
+    slow->next = nullptr;
+    Node* left = mergeSort(head);
+    Node* right = mergeSort(tmp);
+    return merge(left, right);
+}
+
 int main(){
     Node *head;
     vector<int> arr = {1, 2, 4, 4, 3, 2, 1};
     head = ArrayToLlst(arr);
-    Node* curr = head;
 
-    // Introducing cycle
-    // while (curr->next != nullptr)
-    // {
-    //     curr = curr->next;
-    // }
+    Node* sortedHead = mergeSort(head);
+    Display(sortedHead);
 
-    // curr->next = head;
-
-    if(isPalindrome(head)){
-        cout<<"The list is palindrome.";
-    }
-    else{
-        cout<<"The list is not palindrome.";
-    }
-
-    // cout<<LoopLength(head);
-
-    // Display(head);
+    return 0;
 
 }

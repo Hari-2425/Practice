@@ -196,20 +196,11 @@ void ShellSort(int arr[], int n){
 }
 
 int main(){
-    int arr[] = {64, 34, 25, 12, 22, 11, 90};
-    int n = sizeof(arr)/sizeof(arr[0]);
-    cout << "Original array: ";
-    for (int i = 0; i < n; i++)
-    {
-        cout << arr[i] << " ";
+    vector<int> arr = {64, 34, 25, 12, 22, 11, 90};
+    sort(arr.begin(), arr.end());
+    for(auto it: arr){
+        cout<<it<<" ";
     }
-    cout << endl;
-    MergeSort(arr, 0, n-1);
-    cout << "Sorted array: ";
-    for (int i = 0; i < n; i++)
-    {
-        cout << arr[i] << " ";
-    }
-    cout << endl;
-    return 0;
+    cout<<endl;
+    cout<<arr[upper_bound(arr.begin(), arr.end(), 13)-arr.begin()];
 }
