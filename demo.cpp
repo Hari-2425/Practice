@@ -468,17 +468,120 @@ int lengthOfLongestSubstring(string s) {
     return ans;
 }
 
-int main(){
-    
-    priority_queue<int> qu;
-    for(int i=1;i<=10;i++){
-        qu.push(i);
+int longestValidSubstring(vector<string> forbidden, string words){
+    if(words.length() == 0) return 0;
+    unordered_map<string, int> bag;
+    for(auto s: forbidden){
+        bag[s] = 1;
+    }
+    int n = words.length();
+    int l = n-1, r = n-1, maxLen = INT_MIN;
+
+    while(l > -1){
+        for(int i=l;i<=std::min(r, l+9);i++){
+            string tmp = words.substr(l, i-l+1);
+            if(bag.find(tmp)!=bag.end() || bag[tmp]!=1){
+                r = i-1;
+                break;
+            }
+        }
+        maxLen = std::max(maxLen, r-l+1);
+        l--;
+    }
+    return maxLen;
+}
+
+    void hlpr(vector<int>& nums, vector<bool> &used, vector<int> &curr, vector<vector<int>> &store){
+        if(curr.size() == nums.size()){
+            store.push_back(curr);
+            return;
+        }
+        for(int i=0;i<nums.size();i++){
+            if(!used[i]){
+                curr.push_back(nums[i]);
+                used[i] = true;
+                hlpr(nums, used, curr, store);
+                used[i] = false;
+                curr.pop_back();
+            }
+        }
     }
 
-    while (!qu.empty())
-    {
-        cout<<qu.top()<<"\n";
-        qu.pop();
+    vector<vector<int>> permute(vector<int>& nums) {
+        vector<int> curr;
+        vector<bool> used(nums.size(), false);
+        vector<vector<int>> res;
+        hlpr(nums, used, curr, res);
+        return res;
     }
+    struct TreeNode {
+        int val;
+        TreeNode *left;
+        TreeNode *right;
+        TreeNode() : val(0), left(nullptr), right(nullptr) {}
+        TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+        TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+    };
+
+    void hlpr(vector<int> &arr, TreeNode* root){
+        if(root == nullptr){
+            return;
+        }
+        hlpr(arr, root->left);
+        arr.push_back(root->val);
+        hlpr(arr, root->right);
+    }
+
+    int countNegatives(vector<vector<int>>& grid) {
+        // [ 4, 3, 2,-1]
+        // [ 3, 2, 1,-1]
+        // [ 1, 1,-1,-2]
+        // [-1,-1,-2,-3]
+    }
+
+    char nextGreatestLetter(vector<char>& letters, char target) {
+        int low=0, high=letters.size()-1, mid=low+(high-low)/2;
+        while(low<=high){
+            mid=low+(high-low)/2;
+            if(letters[mid]>target){
+                if(mid==0 || mid-1==0){
+                    return letters[0];
+                }
+                else if(letters[mid-1]<=target){
+                    return letters[mid];
+                }
+            }
+            else{
+                if(letters[mid]<target){
+                    low = mid+1;
+                }
+                else if(letters[mid]>target){
+                    high = mid-1;
+                }
+            }
+        }
+        return letters[0];
+    }
+
+    TreeNode* increasingBST(TreeNode* root) {
+        vector<int> arr;
+        hlpr(arr, root);
+        if(arr.size()>0){
+            TreeNode* ans = new TreeNode(arr[0]);
+            TreeNode* curr = ans;
+            for(int i=1;i<arr.size();i++){
+                curr->right = new TreeNode(arr[i]);
+                curr = curr->right;
+            }
+            return ans;
+        }
+        return nullptr;
+    }
+int main(){
+    
+    string s = "abvi";
+    cout<<s.substr(0, 2)<<"\n";
+    int x;
+    cin>>x;
     
 }

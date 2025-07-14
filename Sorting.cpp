@@ -195,22 +195,28 @@ void ShellSort(int arr[], int n){
     }
 }
 
-int main(){
-    vector<int> arr = {3, 4, 4, 7, 8, 10};
-    sort(arr.begin(), arr.end());
-    for(auto it: arr){
-        cout<<it<<" ";
+vector<int> ProdExceptSelf(vector<int> arr){
+    int n = arr.size();
+    vector<int> ans(n);
+    int pref=1, suf=1;
+    ans[0] = 1;
+    for(int i=1;i<n;i++){
+        pref *= arr[i-1];
+        ans[i] = pref;
     }
-    cout<<endl;
-    int target = 8;
-    auto it = lower_bound(arr.begin(), arr.end(), target);
-    if(it != arr.end()){
-        if(arr[it-arr.begin()]>target){
-            cout<<"Floor: "<<arr[it-arr.begin()-1]<<endl;
-        }
-        else{
-            cout<<"Floor: "<<arr[it-arr.begin()]<<endl;
-        }
-        cout<<"Ceil: "<<arr[it-arr.begin()]<<endl;
+    for(int j=n-2;j>=0;j--){
+        suf *= arr[j+1];
+        ans[j] *= suf;
+    }
+
+    
+    return ans;
+}
+
+int main(){
+    vector<int> arr = {1};
+    vector<int> ans = ProdExceptSelf(arr);
+    for(int i=0;i<ans.size();i++){
+        cout<<ans[i]<<" ";
     }
 }
