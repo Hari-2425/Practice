@@ -88,6 +88,35 @@ public:
         // connected graph
         return dfs(1, -1, vis);
     }
+    
+    // BFS (iterative) cycle detection for undirected graphs.
+    // Notes:
+    //  - Uses parent[] to ignore the trivial edge back to the parent.
+    //  - Iterates all components to handle disconnected graphs.
+    bool hasCycleUnDirectedBFS(){
+        vector<int> vis(n+1, 0), parent(n+1, -1);
+        for(int s = 1; s <= n; ++s){
+            if(vis[s]) continue;
+            queue<int> q;
+            vis[s] = 1;
+            parent[s] = -1;
+            q.push(s);
+            while(!q.empty()){
+                int u = q.front(); q.pop();
+                for(int v : graph[u]){
+                    if(!vis[v]){
+                        vis[v] = 1;
+                        parent[v] = u;
+                        q.push(v);
+                    } else if(parent[u] != v){
+                        // visited and not parent -> cycle
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 };
 
 class DirectedGraph{
@@ -133,6 +162,28 @@ public:
             }
         }
         return false;
+    }
+
+    // Kahn's algorithm (BFS / topological sort) to detect cycle in directed graph.
+    // Notes:
+    //  - Build indegree[], push nodes with indegree 0, process.
+    //  - If processed count != n -> cycle exists.
+    bool hasCycleKahn(){
+        vector<int> indeg(n+1, 0);
+        for(const auto &p : graph){
+            for(int v : p.second) ++indeg[v];
+        }
+        queue<int> q;
+        for(int i = 1; i <= n; ++i) if(indeg[i] == 0) q.push(i);
+        int cnt = 0;
+        while(!q.empty()){
+            int u = q.front(); q.pop();
+            ++cnt;
+            for(int v : graph[u]){
+                if(--indeg[v] == 0) q.push(v);
+            }
+        }
+        return cnt != n; // true if cycle detected
     }
 };
 
