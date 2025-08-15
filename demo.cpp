@@ -532,12 +532,7 @@ int longestValidSubstring(vector<string> forbidden, string words){
         hlpr(arr, root->right);
     }
 
-    int countNegatives(vector<vector<int>>& grid) {
-        // [ 4, 3, 2,-1]
-        // [ 3, 2, 1,-1]
-        // [ 1, 1,-1,-2]
-        // [-1,-1,-2,-3]
-    }
+    
 
     char nextGreatestLetter(vector<char>& letters, char target) {
         int low=0, high=letters.size()-1, mid=low+(high-low)/2;
@@ -577,11 +572,372 @@ int longestValidSubstring(vector<string> forbidden, string words){
         }
         return nullptr;
     }
+
+    vector<int> findRightInterval(vector<vector<int>>& intervals) {
+        int n = intervals.size();
+        vector<pair<int, int>> starts(n);
+        for (int i = 0; i < n; ++i) starts[i] = {intervals[i][0], i};
+        sort(starts.begin(), starts.end());
+        vector<int> res(n, -1);
+        for (int i = 0; i < n; ++i) {
+            int target = intervals[i][1];
+            int low = 0, high = n - 1;
+            while (low <= high) {
+                int mid = low + (high - low) / 2;
+                if (starts[mid].first >= target) high = mid - 1;
+                else low = mid + 1;
+            }
+            if (low < n) res[i] = starts[low].second;
+        }
+        return res;
+    }
+
+class SnapshotArray {
+public:
+    vector<int> arr;
+    map<int, vector<int>> mp;
+    int cntr;
+    SnapshotArray(int length) {
+        cntr = -1;
+        arr = vector<int>(length, 0);
+    }
+    
+    void set(int index, int val) {
+        arr[index] = val;
+    }
+    
+    int snap() {
+        cntr++;
+        mp[cntr] = arr;
+        return cntr;
+    }
+    
+    int get(int index, int snap_id) {
+        return mp[snap_id][index];
+    }
+};
+
+int FirstOccur(vector<int> arr, int target){
+    int low=0, high=arr.size()-1, ans=-1;
+    while (low <= high)
+    {
+        /* code */
+        int mid = low + (high-low)/2;
+        if(arr[mid]>=target){
+            high = mid-1;
+            if(arr[mid]==target){
+                ans = mid;
+            }
+        }
+        else{
+            low = mid+1;
+        }
+    }
+    return ans;
+}
+
+int LastOccur(vector<int> arr, int target){
+    int low=0, high=arr.size()-1, ans=-1;
+    while (low <= high)
+    {
+        /* code */
+        int mid = low + (high-low)/2;
+        if(arr[mid]<=target){
+            low = mid+1;
+            if(arr[mid]==target){
+                ans = mid;
+            }
+        }
+        else{
+            high = mid-1;
+        }
+    }
+    return ans;
+}
+
+int BinarySearchinRotatedArray(vector<int> arr, int target){
+    int n=arr.size();
+    int low=0, high=n-1;
+    while(low<=high){
+        int mid = low + (high-low)/2;
+        if(arr[mid]==target){
+            return mid;
+        }
+
+        if(arr[low]==arr[mid] && arr[mid]==arr[high]){
+            low++;
+            high--;
+            continue;
+        }
+        
+        if(arr[mid]>=arr[low]){
+            if(arr[mid]>target && target>=arr[low]){
+                high=mid-1;
+            }
+            else{
+                low=mid+1;
+            }
+        }
+        else{
+            if(target<=arr[high] && arr[mid]<target){
+                low=mid+1;
+            }
+            else{
+                high=mid-1;
+            }
+        }
+    }
+    return -1;
+}
+
+int FindMinRotatedArray(vector<int> arr){
+    int n = arr.size();
+    int low = 0, high = n - 1;
+
+    while (low < high) {
+        int mid = low + (high - low) / 2;
+
+        if (arr[mid] < arr[high]) {
+            // Minimum is in left half (including mid)
+            high = mid;
+        } else if (arr[mid] > arr[high]) {
+            // Minimum is in right half (excluding mid)
+            low = mid + 1;
+        } else {
+            // Cannot determine, reduce search space
+            high--;
+        }
+    }
+
+    return arr[low];  // or return low if index is required
+}
+
+int FindMaxRotatedArray(vector<int> arr){
+    int n = arr.size();
+    int low=0, high=n-1;
+    while (low<high)
+    {
+        int mid = low + (high-low)/2;
+        if(arr[mid]>arr[low]){ // max is present in right half(including mid)
+            low = mid;
+        }
+        else if(arr[mid]<arr[low]){// max is present in left half(excluding mid)
+            high = mid-1;
+        }
+        else{
+            high--;
+            low++;
+        }
+    }
+    return high;
+}
+
+int numOfRotations(vector<int> arr){
+    int n = arr.size();
+    return FindMinRotatedArray(arr);
+}
+
+// all elements are present 2 times except 1 which is single
+// Return single element
+// time complexity - O(logn)
+int BinarySearchSingleVal(vector<int> arr){
+    int n = arr.size();
+    if(n == 1) return arr[0];
+    int low=1, high=n-2;
+    while(low<=high){
+        int mid = low + (high-low)/2;
+        if(arr[mid]!=arr[mid-1] && arr[mid]!=arr[mid+1]){
+            return arr[mid];
+        }
+        if(mid%2==1 && arr[mid-1]==arr[mid] ||
+            mid%2==0 && arr[mid]==arr[mid+1])
+            low = mid+1; // eliminate left half
+        else
+            high = mid-1; // eliminate right half
+    }
+    return -1;
+}
+
+// Find Peak element in mountain array
+int FindPeak(vector<int> arr){
+    int n = arr.size();
+    if(n==1) return arr[0];
+    if(arr[0]>arr[1]) return arr[0];
+    if(arr[n-1]>arr[n-2]) return arr[n-1];
+    int low=1, high=n-2;
+    while(low<=high){
+        int mid = low + (high-low)/2;
+        if(arr[mid]>arr[mid-1] && arr[mid]>arr[mid+1])
+            return arr[mid];
+        else if(arr[mid]<=arr[mid+1]){
+            low = mid+1; // eliminate left half
+        }
+        else{
+            high = mid-1; // eliminate right half
+        }
+    }
+    return -1;
+}
+
+long ReqTime(vector<int> &arr, int t){
+    long ans = 0;
+    for(int i=0;i<arr.size();i++){
+        // ans += ((arr[i] + t - 1) / t);
+        if(arr[i]%t != 0){
+            ans += arr[i]/t + 1;
+        }
+        else{
+            ans += arr[i]/t;
+        }
+    }
+    return ans;
+}
+
+int KokoBananaProb(vector<int> arr, int h){
+    int n = arr.size(), ans=-1;
+    int low=1, high=INT_MIN;
+    for(int i=0;i<n;i++){
+        high = max(arr[i], high);
+    }
+    while(low<=high){
+        int mid = low + (high-low)/2;
+        int time = ReqTime(arr, mid);
+        if(time <= h){
+            ans = time;
+            high = mid-1;
+        }
+        else{
+            low = mid+1;
+        }
+    }
+    return ans;
+}
+
+bool IsEnough(vector<int>& bloomDay, int d, int k, int m){
+    int cnt = 0, adj = 0;
+    for(int i = 0; i < bloomDay.size(); i++){
+        if(bloomDay[i] <= d){
+            adj++;
+            if(adj == k){
+                cnt++;
+                adj = 0; // reset for the next bouquet
+            }
+        } else {
+            adj = 0; // reset because flowers must be adjacent
+        }
+    }
+    return cnt >= m;
+}
+
+int minDays(vector<int>& bloomDay, int m, int k) {
+    int n = bloomDay.size(), ans=-1;
+    long l = m*k;
+    if(l > n) return -1;
+    int low=1, high=INT_MIN;
+    for(int i=0;i<n;i++){
+        high = max(high, bloomDay[i]);
+    }
+    while(low<=high){
+        int mid = low + (high-low)/2;
+        if(IsEnough(bloomDay, mid, k, m)){
+            high = mid-1;
+            ans = mid;
+        }
+        else{
+            low = mid+1;
+        }
+    }
+    return ans;
+}
+
+
+int KthMissingNum(vector<int> arr, int k){
+    int low=0, high=arr.size()-1;
+    
+    while(low<=high){
+        int mid = low + (high-low)/2;
+        int cnt = arr[mid]-(mid+1);
+        if(cnt<k){
+            low = mid+1; //Eliminate left half
+        }
+        else{
+            high = mid-1; //Eliminate right half
+        }
+    }
+    return high+1+k;
+}
+
+bool IsPossible(vector<int> arr, int dist, int k){
+    int n=arr.size(), prev = arr[0];
+    k--;
+    for(int i=1;i<n;i++){
+        
+        if(arr[i]-prev >= dist){
+            k--;
+            prev = arr[i];
+        }
+
+        if(k == 0){
+            return true;
+        }
+    }
+    return false;
+}
+
+int AggressiveCows(vector<int> arr, int k){
+    int n = arr.size(), ans=-1;
+    sort(arr.begin(), arr.end());
+    int low = 0, high = arr[n-1]-arr[0];
+    while(low<=high){
+        int mid = low + (high-low)/2;
+        if(IsPossible(arr, mid, k)){
+            ans = mid;
+            low = mid+1;
+        }
+        else{
+            high = mid-1;
+        }
+    }
+    return ans;
+}
+
+bool Check(vector<int> arr, int sum, int k){
+    int n = arr.size();
+    int curr = 0, ans = 1;
+    for(int i=0;i<n;i++){
+        if(arr[i] > sum) return false;
+        if(curr+arr[i] > sum){
+            ans++;
+            curr = arr[i];
+        }
+        else{
+            curr += arr[i];
+        }
+    }
+    return (ans<=k);
+}
+
+int splitArray(vector<int>& nums, int k) {
+    int n = nums.size(), low=0, high=0, ans=-1;
+    for(int i=0;i<n;i++){
+        high += nums[i];
+    }
+    while(low<=high){
+        int mid = low + (high-low)/2;
+        if(Check(nums, mid, k)){
+            ans = mid;
+            high = mid-1;
+        }
+        else{
+            low = mid+1;
+        }
+    }
+    return ans;
+}
+
 int main(){
     
-    string s = "abvi";
-    cout<<s.substr(0, 2)<<"\n";
-    int x;
-    cin>>x;
-    
+   vector<int> stalls = {1, 2, 8, 4, 9};
+    int cows = 3;
+    cout << AggressiveCows(stalls, cows);
 }
