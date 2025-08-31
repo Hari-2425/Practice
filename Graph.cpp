@@ -31,6 +31,7 @@
 using namespace std;
 
 using ll = long long;
+using pii = pair<int, int>;
 
 class Graph{
     unordered_map<int, vector<int>> graph;
@@ -432,7 +433,7 @@ bool IsCyclePresentDirectedGraph_dfs(int n, vector<vector<int>> &edges){
             // We'll simulate recursive DFS using an explicit stack of pairs (node, state).
             // state == 0 -> node is being entered (pre-visit)
             // state == 1 -> node post-processing (all neighbors handled)
-            using pii = pair<int, int>;
+            
             stack<pii> st;
 
             // Push the start node in pre-visit state and mark it as visiting.
@@ -552,29 +553,249 @@ vector<int> GetTopoOrder(vector<vector<int>> &adj){
     return ans;
 }
 
+
+
+vector<char> AllienDictionary(vector<string> &dict, int s){
+    int n = dict.size();
+    vector<vector<int>> adj(s, vector<int>());
+    for(int i=1;i<n;i++){
+        int k=0;
+        while(k<dict[i].size() && k<dict[i-1].size() && dict[i][k]==dict[i-1][k]){
+            k++;
+        }
+        if(k<dict[i-1].size() && k<dict[i].size())
+            adj[dict[i-1][k]-'a'].push_back(dict[i][k]-'a');
+        else if(k<dict[i-1].size() && k==dict[i].size()){
+            return {};
+        }
+    }
+
+    vector<bool> vis(s, 0);
+    stack<int> st;
+    for(int i=0;i<s;i++){
+        if(!vis[i]){
+            dfs_topo(i, adj, vis, st);
+        }
+    }
+    vector<char> res;
+    while(!st.empty()){
+        res.push_back('a'+st.top());
+        st.pop();
+    }
+    return res;
+}
+
+vector<int> ShortestPathDAG(vector<pair<int, pair<int, int>>> &edges, int src){
+    unordered_map<int, vector<pair<int,int>>> adj;
+    int max_node = 0;
+    for(auto e: edges){
+        int parent = e.first;
+        int child = e.second.first;
+        int weight = e.second.second;
+        adj[parent].push_back({child, weight});
+        max_node = max(max_node, max(parent, child));
+    }
+
+    // Topo sort
+    vector<int> inDeg(max_node+1, 0);
+    for(auto nodes: adj){
+        for(auto node: nodes.second){
+            inDeg[node.first]++;
+        }
+    }
+    queue<int> qu;
+    vector<int> topo;
+    for(int i=1;i<=max_node;i++){
+        if(inDeg[i]==0){
+            qu.push(i);
+        }
+    }
+    while(!qu.empty()){
+        int node = qu.front();
+        qu.pop();
+        topo.push_back(node);
+        for(auto nbr: adj[node]){
+            inDeg[nbr.first]--;
+            if(inDeg[nbr.first]==0){
+                qu.push(nbr.first);
+            }
+        }
+    }
+    if(topo.size() != max_node){
+        return {};
+    }
+    int i=0;
+    while(topo[i]!=src){
+        i++;
+    }
+    vector<int> dist(max_node+1, INT_MAX);
+    dist[topo[i]] = 0;
+    while (i < topo.size())
+    {
+        int node = topo[i];
+        for(auto nbr: adj[node]){
+            int v = nbr.first;
+            int wt = nbr.second;
+            if(dist[node]+wt < dist[v]){
+                dist[v] = dist[node]+wt;
+            }
+        }
+    }
+    return dist;
+}
+
+pair<int, vector<int>> doc_processing(int m, vector<int> &queue_time,
+    vector<int> &processing_time, int k){
+
+    int n = queue_time.size(), totalProcessed = 0;
+    vector<int> end_time(m, 0), cnt(m, 0);
+
+    for(int i=0;i<n;i++){
+
+        int pref = i%m;
+        for(int j=0;j<m;j++){
+            int idx = (pref + j)%m;
+
+            if(end_time[idx] <= queue_time[i]){
+                end_time[idx] = queue_time[i] + processing_time[i];
+                cnt[idx]++;
+                totalProcessed++;
+                break;
+            }
+        }
+
+    }
+    priority_queue<pii, vector<pii>, greater<pii>> pq;
+    for(int i=0;i<m;i++){
+        pq.push({cnt[i], i});
+        if(pq.size() > k){
+            pq.pop();
+        }
+    }
+    vector<int> topK;
+    while(!pq.empty()){
+        topK.push_back(pq.top().second);
+        pq.pop();
+    }
+    return {totalProcessed, topK};
+}
+
+double maxAverageRatio(vector<vector<int>>& classes, int extraStudents) {
+    using pdi=pair<double, int>;
+    priority_queue<pdi, vector<pdi>, greater<pdi>> pq;
+    for(int i=0;i<classes.size();i++){
+        int pass=classes[i][0];
+        int tot = classes[i][1];
+        double ratio = (double)pass/(double)tot;
+        pq.push({ratio, i});
+    }
+    for(int i=1;i<=extraStudents;i++){
+        pdi top_class = pq.top();
+        int cls = pq.top().second;
+        pq.pop();
+        double ratio = (double)(classes[cls][0]+1)/(double)(classes[cls][1]+1);
+        classes[cls][0] += 1;
+        classes[cls][1] += 1;
+        pq.push({ratio, cls});
+    }
+    double sum, cnt=0;
+    while (!pq.empty())
+    {
+        sum += pq.top().first;
+        pq.pop();
+        cnt++;
+    }
+    return sum/cnt;
+    
+}
+
+struct cmp{
+    bool operator()(const pii &a, const pii &b){
+        return a.second > b.second;
+    }
+};
+
+string repeatLimitedString(string s, int repeatLimit) {
+    vector<int> freq(26, 0);
+    for(auto ch: s){
+        freq[ch-'a']++;
+    }
+    priority_queue<pii> pq;
+    for(int i=0;i<26;i++){
+        pq.push({i, freq[i]});
+    }
+    string res = "";
+    while(!pq.empty()){
+        int ch = pq.top().first;
+        int count = pq.top().second;
+        pq.pop();
+        int reqd = min(count, repeatLimit);
+        count -= reqd;
+        while(reqd--){
+            res.push_back('a'+ch);
+        }
+        if(count > 0){
+            if(pq.empty())
+                break;
+            int ch2 = pq.top().first;
+            int count2 = pq.top().second;
+            pq.pop();
+            res.push_back('a'+ch2);
+            count2 -= 1;
+            if(count2>0){
+                pq.push({ch2, count2});
+            }
+            pq.push({ch, count});
+        }
+    }
+    return res;
+}
+
 int_fast32_t main(){
 
-    vector<vector<int>> edges = {
-        {1, 2},
-        {1, 3},
-        {3, 4},
-        {1, 5},
-        {2, 3}
+    // Helper to print results
+    auto print_result = [](const pair<int, vector<int>> &res){
+        cout << "totalProcessed = " << res.first << "\n";
+        cout << "topK servers: ";
+        for(size_t i=0;i<res.second.size();++i){
+            cout << res.second[i];
+            if(i+1 < res.second.size()) cout << ", ";
+        }
+        cout << "\n\n";
     };
-    // Graph G(5, edges.size(), edges);
-    // if(G.hasCycleUnDirectedGraph()){
-    //     cout<<"Cycle exist in given graph.\n";
-    // }
-    // else{
-    //     cout<<"Cycle does not exist in given graph.\n";
-    // }
 
-    DirectedGraph DG(5, edges.size(), edges);
-    if(DG.hasCycleDirectedGraph()){
-        cout<<"Cycle exist in given directed graph.\n";
+    // Test case 1: small example
+    {
+        int m = 2;
+        vector<int> queue_time = {0, 1, 2};
+        vector<int> processing_time = {5, 2, 3};
+        int k = 2;
+        cout << "Test 1: m=2, queue_time={0,1,2}, processing_time={5,2,3}, k=2\n";
+        auto res = doc_processing(m, queue_time, processing_time, k);
+        print_result(res);
     }
-    else{
-        cout<<"Cycle does not exist in given directed graph.\n";
+
+    // Test case 2: multiple servers, simultaneous arrivals
+    {
+        int m = 3;
+        vector<int> queue_time = {0, 0, 1, 2, 3};
+        vector<int> processing_time = {1, 2, 3, 1, 2};
+        int k = 3;
+        cout << "Test 2: m=3, queue_time={0,0,1,2,3}, processing_time={1,2,3,1,2}, k=3\n";
+        auto res = doc_processing(m, queue_time, processing_time, k);
+        print_result(res);
     }
+
+    // Test case 3: single server (edge case)
+    {
+        int m = 1;
+        vector<int> queue_time = {0, 5, 10};
+        vector<int> processing_time = {2, 2, 2};
+        int k = 1;
+        cout << "Test 3: m=1, queue_time={0,5,10}, processing_time={2,2,2}, k=1\n";
+        auto res = doc_processing(m, queue_time, processing_time, k);
+        print_result(res);
+    }
+
     return 0;
 }
