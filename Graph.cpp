@@ -709,12 +709,6 @@ double maxAverageRatio(vector<vector<int>>& classes, int extraStudents) {
     
 }
 
-struct cmp{
-    bool operator()(const pii &a, const pii &b){
-        return a.second > b.second;
-    }
-};
-
 string repeatLimitedString(string s, int repeatLimit) {
     vector<int> freq(26, 0);
     for(auto ch: s){
@@ -751,51 +745,209 @@ string repeatLimitedString(string s, int repeatLimit) {
     return res;
 }
 
+int minSetSize(vector<int>& arr) {
+    unordered_map<int, int> freq;
+    for(auto ar: arr){
+        freq[ar]++;
+    }
+    priority_queue<pair<int, int>> pq;
+    for(auto fr: freq){
+        pq.push({fr.second, fr.first});
+    }
+    int sum = 0, ans=0;
+
+    while(sum<arr.size()/2){
+        sum += pq.top().first;
+        pq.pop();
+        ans++;
+    }
+    return ans;
+}
+
+int leastInterval(vector<char>& tasks, int n) {
+    vector<int> freq(26, 0);
+    for(char ch: tasks){
+        freq[ch-'A']++;
+    }
+    priority_queue<int> pq;
+    for(int i=0;i<26;i++){
+        if(freq[i]>0) pq.push(freq[i]);
+    }
+    int time=0;
+    while(!pq.empty()){
+        vector<int> tmp;
+        int i=0;
+        for(;i<=n && !pq.empty();i++){
+            int tp = pq.top();
+            pq.pop();
+            if(--tp > 0) tmp.push_back(tp);
+        }
+        for(int v: tmp){
+            pq.push(v);
+        }
+        time += pq.empty() ? i : (n+1);
+    }
+    return time;
+}
+
+long long maxSum(vector<vector<int>>& grid, vector<int>& limits, int k) {
+    if(grid.size()==0 || grid[0].size()==0) return 0;
+    int n = grid.size(), m = grid[0].size(), take=0;
+    priority_queue<int, vector<int>, greater<int>> fpq;
+    for(int i=0;i<n;i++){
+        take += limits[i];
+        for(int j=0;j<m;j++){
+            fpq.push(grid[i][j]);
+            if(fpq.size()>take){
+                fpq.pop();
+            }
+        }
+    }
+    while(fpq.size()>k){
+        fpq.pop();
+    }
+    long long sum = 0;
+    while(!fpq.empty()){
+        sum += fpq.top();
+        fpq.pop();
+    }
+    return sum;
+}
+
+int word_ladder(string beginWord, string endWord, vector<string>& wordList){
+    int n = wordList.size();
+    set<string> list;
+    for(int i=0;i<n;i++){
+        list.insert(wordList[i]);
+    } 
+    queue<pair<string, int>> qu;
+    qu.push({beginWord, 1});
+    list.erase(beginWord);
+    int ans = -1;
+    while(!qu.empty()){
+        string word = qu.front().first;
+        int lvl = qu.front().second;
+        qu.pop();
+        if(word == endWord){
+            ans = lvl;
+            break;
+        }
+        for(int i=0;i<word.length();i++){
+            for(int j=0;j<26;j++){
+                string tmp = word;
+                tmp[i] = 'a'+j;
+
+                if(list.find(tmp)!=list.end()){
+                    qu.push({tmp, lvl+1});
+                    list.erase(tmp);
+                }
+            }
+        }
+    }
+    return ans==-1 ? 0 : ans;
+}
+
+vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {
+    int n = wordList.size();
+    unordered_set<string> st;
+    for(auto w: wordList){
+        st.insert(w);
+    }
+    queue<vector<string>> qu;
+    qu.push({beginWord});
+    st.erase(beginWord);
+    int lvl = INT_MAX;
+    vector<vector<string>> ans;
+    while(!qu.empty()){
+        
+        int sz = qu.size();
+        unordered_set<string> delWords;
+        while(sz--){
+            auto path = qu.front();
+            string word = path.back();
+            qu.pop();
+            if(word == endWord){
+                if(ans.size()==0 || ans[0].size()==path.size()){
+                    ans.push_back(path);
+                }
+                else if(path.size()>ans[0].size()){
+                    return ans;
+                }
+            }
+            
+            for(int i=0;i<word.size();i++){
+                for(int j=0;j<26;j++){
+                    string temp_word = word;
+                    temp_word[i] = j + 'a';
+                    if(st.find(temp_word)!=st.end()){
+                        vector<string> temp_path = path;
+                        temp_path.push_back(temp_word);
+                        qu.push(temp_path);
+                        delWords.insert(temp_word);
+                    }
+                }
+            }
+            
+        }
+        for(auto w: delWords){
+            st.erase(w);
+        }
+    }
+    return ans;
+}
+
+int GetParentNode(int node, vector<int> &par){
+    if(par[node] == node) return node;
+    return par[node] = GetParentNode(par[node], par);
+}
+
+bool Union(int u, int v, vector<int> &par, vector<int> &sz){
+    int pu = GetParentNode(u, par);
+    int pv = GetParentNode(v, par);
+
+    if(pu == pv){
+        return false;
+    }
+    par[pv] = pu;
+    sz[pu] += sz[pv];
+    return true;
+}
+
+vector<int> findRedundantDirectedConnection(vector<vector<int>>& edges) {
+    int n = edges.size();
+    vector<int> parent(n + 1, 0);
+    vector<int> candA, candB;
+    for (auto& edge : edges) {
+        int u = edge[0], v = edge[1];
+        if (parent[v] == 0) {
+            parent[v] = u;
+        } else {
+            candA = {parent[v], v};
+            candB = edge;
+            edge[1] = 0; // Temporarily remove this edge
+        }
+    }
+    // Union-Find
+    vector<int> par(n + 1);
+    for (int i = 1; i <= n; ++i) par[i] = i;
+    for (auto& edge : edges) {
+        int u = edge[0], v = edge[1];
+        if (v == 0) continue; // skip removed edge
+        int pu = u, pv = v;
+        while (par[pu] != pu) pu = par[pu];
+        while (par[pv] != pv) pv = par[pv];
+        if (pu == pv) {
+            if (candA.empty()) return edge;
+            return candA;
+        }
+        par[pv] = pu;
+    }
+    return candB;
+}
+
 int_fast32_t main(){
 
-    // Helper to print results
-    auto print_result = [](const pair<int, vector<int>> &res){
-        cout << "totalProcessed = " << res.first << "\n";
-        cout << "topK servers: ";
-        for(size_t i=0;i<res.second.size();++i){
-            cout << res.second[i];
-            if(i+1 < res.second.size()) cout << ", ";
-        }
-        cout << "\n\n";
-    };
-
-    // Test case 1: small example
-    {
-        int m = 2;
-        vector<int> queue_time = {0, 1, 2};
-        vector<int> processing_time = {5, 2, 3};
-        int k = 2;
-        cout << "Test 1: m=2, queue_time={0,1,2}, processing_time={5,2,3}, k=2\n";
-        auto res = doc_processing(m, queue_time, processing_time, k);
-        print_result(res);
-    }
-
-    // Test case 2: multiple servers, simultaneous arrivals
-    {
-        int m = 3;
-        vector<int> queue_time = {0, 0, 1, 2, 3};
-        vector<int> processing_time = {1, 2, 3, 1, 2};
-        int k = 3;
-        cout << "Test 2: m=3, queue_time={0,0,1,2,3}, processing_time={1,2,3,1,2}, k=3\n";
-        auto res = doc_processing(m, queue_time, processing_time, k);
-        print_result(res);
-    }
-
-    // Test case 3: single server (edge case)
-    {
-        int m = 1;
-        vector<int> queue_time = {0, 5, 10};
-        vector<int> processing_time = {2, 2, 2};
-        int k = 1;
-        cout << "Test 3: m=1, queue_time={0,5,10}, processing_time={2,2,2}, k=1\n";
-        auto res = doc_processing(m, queue_time, processing_time, k);
-        print_result(res);
-    }
+    
 
     return 0;
 }
