@@ -935,6 +935,52 @@ int splitArray(vector<int>& nums, int k) {
     return ans;
 }
 
+vector<int> decimalRepresentation(int n) {
+    int fact = 1;
+    vector<int> ans;
+    while(n > 0){
+        int dig = n%10;
+        ans.push_back(dig*fact);
+        fact *= 10;
+        n = n/10;
+    }
+    reverse(ans.begin(), ans.end());
+    return ans;
+}
+
+long long splitArray(vector<int>& nums) {
+    int n = nums.size();
+    if(n==2) return abs(nums[0]-nums[n-1]);
+    int l = -1, r = n;
+    int left = INT_MIN, right = INT_MIN;
+    long long left_sum=0, right_sum=0;
+    while(l < r){
+        if(left >= nums[l+1] || right >= nums[r-1]){
+            break;
+        }
+        left = nums[l+1];
+        right = nums[r-1];
+        left_sum += nums[l+1];
+        right_sum += nums[r-1];
+        l++;
+        r--;
+    }
+    while(l<r && left<nums[l+1]){
+        left_sum += nums[l+1];
+        left = nums[l+1];
+        l++;
+    }
+    while(l<r && right<nums[r-1]){
+        right_sum += nums[r-1];
+        right = nums[r-1];
+        r--;
+    }
+    if(abs(l-r)>1) return -1;
+    if(l == r)
+        return min(abs(left_sum-right_sum+nums[l]), abs(right_sum-left_sum+nums[l]));
+    return abs(left_sum-right_sum);
+}
+
 int main(){
     
    vector<int> stalls = {1, 2, 8, 4, 9};

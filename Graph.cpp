@@ -945,9 +945,81 @@ vector<int> findRedundantDirectedConnection(vector<vector<int>>& edges) {
     return candB;
 }
 
+bool findOrder_dfs(int node, unordered_map<int, vector<int>> &adj,
+    vector<int> &vis, vector<int> &ans_path, unordered_set<int> &inPath){
+    
+    inPath.insert(node);
+    vis[node] = 1;
+    for(auto nbr: adj[node]){
+        if(!vis[nbr]){
+            if(!findOrder_dfs(nbr, adj, vis, ans_path, inPath))
+                return false;
+        }
+        else if(inPath.find(nbr) != inPath.end()){ // if nbr node is present in current traversing path
+            return false;
+        }
+    }
+    inPath.erase(node);
+    ans_path.push_back(node);
+    return true;
+}
+
+vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+    unordered_map<int, vector<int>> adj;
+    vector<int> vis(numCourses, 0), ans_path;
+    unordered_set<int> inPath;
+
+    for(auto pre: prerequisites){
+        adj[pre[0]].push_back(pre[1]);
+    }
+    for(int i=0;i<numCourses;i++){
+        if(!vis[i]){
+            if(!findOrder_dfs(i, adj, vis, ans_path, inPath)){
+                return {};
+            }
+        }
+    }
+    return ans_path;
+}
+
+long long maxSumDivisibleby3(vector<int> &nums){
+    long long n = nums.size(), totalSum=0;
+    vector<int> mod1, mod2;
+    for(auto it: nums){
+        totalSum += it;
+        if(it%3 == 1) mod1.push_back(it);
+        if(it%3 == 2) mod2.push_back(it);
+    }
+
+    if(totalSum%3 == 0){
+        return totalSum;
+    }
+    
+    sort(mod1.begin(), mod1.end());
+    sort(mod2.begin(), mod2.end());
+
+    if(totalSum%3 == 1){
+        int remove1 = (mod1.size()>=1) ? mod1[0] : INT_MAX;
+        int remove2 = (mod2.size()>=2) ? mod2[0]+mod2[1] : INT_MAX;
+        if(min(remove1, remove2) == INT_MAX)
+            return 0;
+        totalSum -= min(remove1, remove2);
+    }
+
+    else if(totalSum%3 == 2){
+        int remove1 = (mod1.size()>=2) ? mod1[0]+mod1[1] : INT_MAX;
+        int remove2 = (mod2.size()>=1) ? mod2[0] : INT_MAX;
+        if(min(remove1, remove2) == INT_MAX)
+            return 0;
+        totalSum -= min(remove1, remove2);
+    }
+    return totalSum;
+}
+
 int_fast32_t main(){
 
-    
+    vector<int> nums = {2,2,2,1};
+    cout<<"ANS: "<<maxSumDivisibleby3(nums)<<"\n";
 
     return 0;
 }
