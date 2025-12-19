@@ -11,26 +11,27 @@ struct PairHash {
     }
 };
 //KnapSack type
-int recursive_func(int idx, vector<int> &weights, vector<int> &val, int W, unordered_map<pii, int, PairHash> &store){
+int recursive_func(int idx, vector<int> &weights, vector<int> &val, int W, unordered_map<string, int> &store){
     if(idx>=weights.size() || W<=0)
         return 0;
-    if(store.count({idx, W})){
-        return store[{idx, W}];
+    string key = to_string(idx) + ", " + to_string(W);
+    if(store.count(key)){
+        return store[key];
     }
     if(weights[idx] <= W){
         int ans1 = recursive_func(idx+1, weights, val, W, store); //not selected
         int ans2 = recursive_func(idx+1, weights, val, W-weights[idx], store) + val[idx]; //Selected
          
-        return store[{idx, W}] = max(ans1, ans2);
+        return store[key] = max(ans1, ans2);
     }
     
-    return store[{idx, W}] = recursive_func(idx+1, weights, val, W, store);
+    return store[key] = recursive_func(idx+1, weights, val, W, store);
 }
 
 int knapSack(vector<int> weights, vector<int> val, int W){
     int n = weights.size();
     
-    unordered_map<pii, int, PairHash> store;
+    unordered_map<string, int> store;
     return recursive_func(0, weights, val, W, store);
 }
 
