@@ -139,46 +139,131 @@ int subsetSum_count(vector<int> &nums, int target){
     return dp[n][target];
 }
 
-int subSet_min_diff(vector<int> &nums){
+/* PATTERN: Partition DP (Subset Sum)
+
+Idea:
+- Compute total sum of array
+- Try to find a subset whose sum is as close as possible
+  to totalSum / 2
+- Answer = min |totalSum - 2 * subsetSum|
+
+DP Definition:
+dp[i][j] = true if we can form sum j using first i elements */
+int subSet_min_diff(vector<int> &nums) {
     int totalSum = 0;
     int n = nums.size();
 
-    for(auto it: nums){
-        totalSum += it;
-    }
-    int s = (totalSum+1)/2;
-    vector<vector<bool>> dp(n+1, vector<bool>(s+1, 0));
-
-    for(int i=0;i<=n;i++){
-        dp[i][0] = 1;
+    // Step 1: Calculate total sum
+    for (int x : nums) {
+        totalSum += x;
     }
 
-    for(int i=1;i<=n;i++){
-        for(int j=1;j<=s;j++){
-            bool not_pick = dp[i-1][j];
-            bool pick = 0;
-            if(nums[i-1]<=j){
-                pick = dp[i-1][j-nums[i-1]];
+    // We only need to check till half of total sum
+    int target = (totalSum + 1) / 2;
+
+    // Step 2: DP table
+    vector<vector<bool>> dp(n + 1, vector<bool>(target + 1, false));
+
+    // Step 3: Base Case
+    // Sum = 0 is always possible (empty subset)
+    for (int i = 0; i <= n; i++) {
+        dp[i][0] = true;
+    }
+
+    // Step 4: Fill DP table (0/1 Knapsack style)
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= target; j++) {
+
+            // Option 1: Do not pick current element
+            bool not_pick = dp[i - 1][j];
+
+            // Option 2: Pick current element (if possible)
+            bool pick = false;
+            if (nums[i - 1] <= j) {
+                pick = dp[i - 1][j - nums[i - 1]];
             }
+
             dp[i][j] = pick || not_pick;
         }
     }
-    
-    //Will traverse the last row of dp becoz it contains all
-    // the valid subset sum to the half of total sum.
+
+    // Step 5: Find minimum difference
     int ans = INT_MAX;
-    for(int i=0;i<=s;i++){
-        if(dp[n][i] == 1){
-            ans = min(ans,abs( totalSum - 2*i));
+
+    // Only need last row since it contains all valid subset sums
+    for (int s1 = 0; s1 <= target; s1++) {
+        if (dp[n][s1]) {
+            int diff = abs(totalSum - 2 * s1);
+            ans = min(ans, diff);
         }
     }
+
     return ans;
+}
+
+// s1 - s2 = diff
+// total is the sum of all nums elements
+// s1 - total + s1 = diff
+// 2*s1 - total = diff
+// 2*s1 = total + diff
+// s1 = (total + diff)/2
+int subSet_diff_count(vector<int> &nums, int diff){
+    int n = nums.size();
+    int total = 0;
+    for(auto it: nums){
+        total += it;
+    }
+    // Invalid cases
+    if (diff > total || (diff + total) % 2 != 0)
+        return 0;
+    
+    int s = (diff + total) / 2;
+
+    vector<vector<int>> dp(n + 1, vector<int>(s + 1, 0));
+    dp[0][0] = 1;
+
+    for (int i = 1; i <= n; i++) {
+        for (int j = 0; j <= s; j++) {
+            dp[i][j] = dp[i - 1][j];
+            if (nums[i - 1] <= j) {
+                dp[i][j] += dp[i - 1][j - nums[i - 1]];
+            }
+        }
+    }
+
+    return dp[n][s];
+}
+
+void CountPosNegTargetSum_hlpr(int indx, vector<int> &nums, int trg,
+    unordered_map<vector<int>, int> &memo){
+
+}
+
+// ----UNBOUND KNAPSACK----
+int min_coin_change(vector<int> &coins, int sum){
+    int n = coins.size();
+    vector<vector<int>> dp(n+1, vector<int>(sum+1));
+    for(int i=0;i<=n;i++){
+        dp[i][0] = 0;
+    }
+    for(int i=1;i<=sum;i++){
+        dp[0][i] = INT_MAX;
+    }
+    for(int i=1;i<=n;i++){
+        for(int j=1;j<=sum;j++){
+            dp[i][j] = dp[i-1][j];
+            if(coins[i-1] <= j){
+                dp[i][j] = min((dp[i][j-coins[i-1]]==INT_MAX) ? INT_MAX : 1 + dp[i][j-coins[i-1]], dp[i][j]);
+            }
+        }
+    }
+    return dp[n][sum];
 }
 
 int main(){
     
-    vector<int> nums = {1, 2, 7};
-    cout<<"ANS: "<<subSet_min_diff(nums);
+    vector<int> nums = {1, 2, 3};
+    cout<<"ANS: "<<min_coin_change(nums, 5);
 
     return 0;
 }
