@@ -139,10 +139,46 @@ int subsetSum_count(vector<int> &nums, int target){
     return dp[n][target];
 }
 
+int subSet_min_diff(vector<int> &nums){
+    int totalSum = 0;
+    int n = nums.size();
+
+    for(auto it: nums){
+        totalSum += it;
+    }
+    int s = (totalSum+1)/2;
+    vector<vector<bool>> dp(n+1, vector<bool>(s+1, 0));
+
+    for(int i=0;i<=n;i++){
+        dp[i][0] = 1;
+    }
+
+    for(int i=1;i<=n;i++){
+        for(int j=1;j<=s;j++){
+            bool not_pick = dp[i-1][j];
+            bool pick = 0;
+            if(nums[i-1]<=j){
+                pick = dp[i-1][j-nums[i-1]];
+            }
+            dp[i][j] = pick || not_pick;
+        }
+    }
+    
+    //Will traverse the last row of dp becoz it contains all
+    // the valid subset sum to the half of total sum.
+    int ans = INT_MAX;
+    for(int i=0;i<=s;i++){
+        if(dp[n][i] == 1){
+            ans = min(ans,abs( totalSum - 2*i));
+        }
+    }
+    return ans;
+}
+
 int main(){
     
-    vector<int> nums = {2, 3, 5, 6, 8, 10};
-    cout<<"ANS: "<<subsetSum_count(nums, 10);
+    vector<int> nums = {1, 2, 7};
+    cout<<"ANS: "<<subSet_min_diff(nums);
 
     return 0;
 }
