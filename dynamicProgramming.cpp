@@ -302,10 +302,29 @@ int min_coin_change(vector<int> &coins, int sum) {
 }
 
 
+// *******LONGEST COMMON SUBSEQUENCE*******
+// Recusrsive version
+int LCS(string &a, string &b, int i, int j, vector<vector<int>>& dp){
+    if(i==0 || j==0)
+        return 0;
+    if(dp[i][j] != -1)
+        return dp[i][j];
+    if(a[i-1] == b[j-1]){
+        return dp[i][j] = 1 + LCS(a, b, i-1, j-1, dp);
+    }
+    return dp[i][j] = max(LCS(a, b, i-1, j, dp), LCS(a, b, i, j-1, dp));
+}
+
+
 int main(){
     
-    vector<int> nums = {1, 2, 3};
-    cout<<"ANS: "<<min_coin_change(nums, 5);
+    // vector<int> nums = {1, 2, 3};
+    // cout<<"ANS: "<<min_coin_change(nums, 5);
+
+    string a = "abcdgh";
+    string b = "abedfh";
+    vector<vector<int>> dp(a.length()+1, vector<int>(b.length()+1, -1));
+    cout<<LCS(a, b, a.length(), b.length(), dp);
 
     return 0;
 }
