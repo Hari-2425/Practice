@@ -239,26 +239,68 @@ void CountPosNegTargetSum_hlpr(int indx, vector<int> &nums, int trg,
 
 }
 
-// ----UNBOUND KNAPSACK----
-int min_coin_change(vector<int> &coins, int sum){
+// ================== UNBOUNDED KNAPSACK PATTERN ==================
+// Problem Type:
+// - Coin Change (Minimum number of coins)
+// - Each coin can be used unlimited times
+// - Goal: Minimize count to reach exact sum
+
+// DP Meaning:
+// dp[i][j] = Minimum number of coins needed to make sum = j
+//            using first i coins
+
+// Choice Diagram (for coin i):
+// 1) Exclude coin i     → dp[i-1][j]
+// 2) Include coin i    → 1 + dp[i][j - coin[i-1]]
+//    (stay at same i because coins are unlimited)
+
+// Final Answer:
+// dp[n][sum]
+
+int min_coin_change(vector<int> &coins, int sum) {
     int n = coins.size();
+
+    // dp table: (n+1) x (sum+1)
     vector<vector<int>> dp(n+1, vector<int>(sum+1));
-    for(int i=0;i<=n;i++){
+
+    // ---------------- BASE CASES ----------------
+
+    // Case 1: Sum = 0
+    // Minimum coins needed to make sum 0 is always 0
+    for (int i = 0; i <= n; i++) {
         dp[i][0] = 0;
     }
-    for(int i=1;i<=sum;i++){
-        dp[0][i] = INT_MAX;
+
+    // Case 2: No coins available (i = 0)
+    // Impossible to make any positive sum
+    for (int j = 1; j <= sum; j++) {
+        dp[0][j] = INT_MAX;
     }
-    for(int i=1;i<=n;i++){
-        for(int j=1;j<=sum;j++){
+
+    // ---------------- DP TRANSITION ----------------
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= sum; j++) {
+
+            // Option 1: Exclude current coin
             dp[i][j] = dp[i-1][j];
-            if(coins[i-1] <= j){
-                dp[i][j] = min((dp[i][j-coins[i-1]]==INT_MAX) ? INT_MAX : 1 + dp[i][j-coins[i-1]], dp[i][j]);
+
+            // Option 2: Include current coin (unbounded)
+            if (coins[i-1] <= j) {
+
+                // Guard against INT_MAX overflow
+                int include = (dp[i][j - coins[i-1]] == INT_MAX)
+                                ? INT_MAX
+                                : 1 + dp[i][j - coins[i-1]];
+
+                dp[i][j] = min(dp[i][j], include);
             }
         }
     }
+
+    // If dp[n][sum] == INT_MAX → not possible
     return dp[n][sum];
 }
+
 
 int main(){
     
