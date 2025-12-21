@@ -304,15 +304,34 @@ int min_coin_change(vector<int> &coins, int sum) {
 
 // *******LONGEST COMMON SUBSEQUENCE*******
 // Recusrsive version
-int LCS(string &a, string &b, int i, int j, vector<vector<int>>& dp){
+int LCS_recursive(string &a, string &b, int i, int j, vector<vector<int>>& dp){
     if(i==0 || j==0)
         return 0;
     if(dp[i][j] != -1)
         return dp[i][j];
     if(a[i-1] == b[j-1]){
-        return dp[i][j] = 1 + LCS(a, b, i-1, j-1, dp);
+        return dp[i][j] = 1 + LCS_recursive(a, b, i-1, j-1, dp);
     }
-    return dp[i][j] = max(LCS(a, b, i-1, j, dp), LCS(a, b, i, j-1, dp));
+    return dp[i][j] = max(LCS_recursive(a, b, i-1, j, dp), LCS_recursive(a, b, i, j-1, dp));
+}
+
+// Iterative version
+int LCS_iterative(string x, string y){
+    int m=x.length(), n=y.length();
+    vector<vector<int>> dp(m+1, vector<int>(n+1, 0));
+
+    for(int i=1;i<=m;i++){
+        for(int j=1;j<=n;j++){
+            if(x[i-1] == y[j-1]){
+                dp[i][j] = 1 + dp[i-1][j-1];
+            }
+            else{
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1]);
+            }
+        }
+    }
+
+    return dp[m][n];
 }
 
 
@@ -324,7 +343,8 @@ int main(){
     string a = "abcdgh";
     string b = "abedfh";
     vector<vector<int>> dp(a.length()+1, vector<int>(b.length()+1, -1));
-    cout<<LCS(a, b, a.length(), b.length(), dp);
+    cout<<LCS_recursive(a, b, a.length(), b.length(), dp)<<"\n";
+    cout<<LCS_iterative(a, b);
 
     return 0;
 }
