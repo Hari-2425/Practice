@@ -1,6 +1,15 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+void Display(vector<vector<int>> &vec){
+    for(int i=0;i<vec.size();i++){
+        for(int j=0;j<vec[0].size();j++){
+            cout<<vec[i][j]<<" ";
+        }
+        cout<<"\n";
+    }
+}
+
 // ===== 0/1 KNAPSACK PATTERN =====
 // State: (idx, W) represents max value using items from index idx onwards with capacity W
 // Choice: for each item, decide to include it or exclude it
@@ -330,9 +339,115 @@ int LCS_iterative(string x, string y){
             }
         }
     }
-
+    int i=m, j=n;
+    string ans = "";
+    while(i>0 && j>0){
+        if(x[i-1] == y[j-1]){
+            ans.push_back(x[i-1]);
+            i--;
+            j--;
+        }
+        else if(dp[i][j-1] >= dp[i-1][j]){
+            j--;
+        }
+        else{
+            i--;
+        }
+    }
+    reverse(ans.begin(), ans.end());
+    cout<<ans<<"\n";
     return dp[m][n];
 }
+
+
+// *******LONGEST COMMON SUBSTRING*******
+int LongestCommonSubstring(string x, string y){
+    int m=x.length(), n=y.length();
+    vector<vector<int>> dp(m+1, vector<int>(n+1, 0));
+    
+    for(int i=1;i<=m;i++){
+        for(int j=1;j<=n;j++){
+            if(x[i-1] == y[j-1]){
+                dp[i][j] = 1 + dp[i-1][j-1];
+            }
+            else{
+                dp[i][j] = max(dp[i][j-1], dp[i-1][j]);
+            }
+        }
+    }
+
+    string ans = "";
+    string finalAns = "";
+    int maxLen = 0;
+    int i=m, j=n;
+    while(i>0 && j>0){
+        if(x[i-1] == y[j-1]){
+            ans.push_back(x[i-1]);
+            i--;
+            j--;
+        }
+        else{
+            if(dp[i-1][j] >= dp[i][j-1]){
+                i--;
+            }
+            else{
+                j--;
+            }
+            if(ans.size() > maxLen){
+                maxLen = ans.size();
+                finalAns = ans;
+                ans = "";
+            }
+        }
+    }
+
+    cout<<finalAns<<"\n";
+
+    return finalAns.size();
+}
+
+string LongestRepeatingSubsequence(string s) {
+    int n = s.length();
+    vector<vector<int>> dp(n + 1, vector<int>(n + 1, 0));
+
+    // Build DP table
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (s[i - 1] == s[j - 1] && i != j) {
+                dp[i][j] = 1 + dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+
+    cout << "Length: " << dp[n][n] << "\n";
+
+    // Correct backtracking
+    int i = n, j = n;
+    string ans = "";
+
+    while (i > 0 && j > 0) {
+        if (s[i - 1] == s[j - 1] && i != j &&
+            dp[i][j] == 1 + dp[i - 1][j - 1]) {
+
+            ans.push_back(s[i - 1]);
+            i--;
+            j--;
+        }
+        else if (dp[i - 1][j] > dp[i][j - 1]) {
+            i--;
+        }
+        else {
+            j--;
+        }
+    }
+
+    reverse(ans.begin(), ans.end());
+    return ans;
+}
+
+
 
 
 int main(){
@@ -341,10 +456,16 @@ int main(){
     // cout<<"ANS: "<<min_coin_change(nums, 5);
 
     string a = "abcdgh";
-    string b = "abedfh";
-    vector<vector<int>> dp(a.length()+1, vector<int>(b.length()+1, -1));
-    cout<<LCS_recursive(a, b, a.length(), b.length(), dp)<<"\n";
-    cout<<LCS_iterative(a, b);
+    string b = "abedgh";
+    string c = "agtxbcbxhia";
+    string d = c;
+    reverse(d.begin(), d.end());
+    // vector<vector<int>> dp(a.length()+1, vector<int>(b.length()+1, -1));
+    // cout<<LCS_recursive(a, b, a.length(), b.length(), dp)<<"\n";
+    // cout<<LCS_iterative(c, d);
+    string e = "AAEBCBDDXVXABDX";
+    
+    cout<<LongestCommonSubstring(c, d);
 
     return 0;
 }
