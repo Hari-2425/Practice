@@ -981,9 +981,116 @@ long long splitArray(vector<int>& nums) {
     return abs(left_sum-right_sum);
 }
 
+
+int no_of_pairs(vector<int> &nums){
+    int n = nums.size();
+    unordered_map<int, int> freq;
+    for(int i=0;i<n;i++){
+        freq[nums[i]-i]++;
+    }
+    int ans = 0;
+    for(auto it: freq){
+        if(it.second >=2){
+            int val = it.second;
+            ans += (val*(val-1))/2;
+        }
+    }
+    return ans;
+}
+
+int reverse_n(int n){
+    int ans = 0;
+    while(n > 0){
+        ans = ans*10 + (n%10);
+        n /= 10;
+    }
+    return ans;
+}
+
+int mirrorDistance(int n) {
+    if(n/10 == 0){
+        return 0;
+    }
+    int rn = reverse_n(n);
+    return abs(n - rn);  
+}
+
+long long minCost(string s, vector<int>& cost) {
+
+    long long ans = 0;
+    int n = s.length();
+    long long total = 0;
+    unordered_map<char, int> freq;
+    for(int i=0;i<n;i++){
+        total += cost[i];
+        if(!freq.count(s[i])){
+            freq[s[i]] = cost[i];
+        }
+        else{
+            freq[s[i]] += cost[i];
+        }
+    }
+    long long mn = INT_FAST64_MAX;
+    for(auto it: freq){
+        mn = min(mn, total-it.second);
+    }
+    return mn;
+}
+
+long long interactionCosts(int n, vector<vector<int>>& edges, 
+    vector<int>& group) {
+    vector<vector<int>> adj(n, vector<int>());
+    for(auto it: edges){
+        int u = it[0];
+        int v = it[1];
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    vector<string> number(n);
+    queue<int> qu;
+    qu.push(0);
+    number[0] = "0";
+    while(!qu.empty()){
+        int node = qu.front();
+        qu.pop();
+        for(auto nbr: adj[node]){
+            number[nbr] = number[node] + "_" + to_string(nbr);
+            qu.push(nbr);
+        }
+    }
+    unordered_map<int, vector<int>> grps;
+    for(int i=0;i<group.size();i++){
+        grps[group[i]].push_back(i);
+    }
+    int cost = 0;
+    for(auto vec: grps){
+        int l = vec.second.size();
+        
+        for(int i=0;i<l;i++){
+            for(int j=i+1;j<l;j++){
+                string s1 = number[i];
+                string s2 = number[j];
+                int p=0, q=0;
+                while(p<s1.size() && q<s2.size()){
+                    if(s1[p] != s2[q])
+                        break;
+                }
+                cost += (s1.size() + s2.size() - 2*(p-1));
+            }
+        }
+    }
+    return cost;
+}
+
 int main(){
     
-   vector<int> stalls = {1, 2, 8, 4, 9};
-    int cows = 3;
-    cout << AggressiveCows(stalls, cows);
+    vector<vector<int>> edges = {
+        {0, 1},
+        {0, 2},
+        {0, 3}
+    };
+    vector<int> groups = {1,1,4,4};
+    cout<<interactionCosts(4, edges, groups);
+
+    return 0;
 }

@@ -448,6 +448,163 @@ string LongestRepeatingSubsequence(string s) {
 }
 
 
+// ***** Matrix Chain Multiplication *****
+// Pattern: Partition DP (Matrix Chain Multiplication)
+//
+// Problem type:
+// - Given a range [i..j]
+// - Try all possible partitions k in [i..j-1]
+// - Combine left and right subproblems
+// - Take MIN / MAX based on problem requirement
+//
+
+// 2 For Loop strategies that can be used for MCM pattern
+// for(k=i;k<j;k++) Partition1: i to k, Partition2: k+1 to j-1
+// for(k=i+1;k<=j;k++) Partition1: i to k-1, Partition2: k+1 to j
+
+// Recurrence:
+// dp[i][j] = min over k=i..j-1 of
+//            (dp[i][k] + dp[k+1][j] + cost of combining)
+//
+// Base Case:
+// i >= j  → single matrix or no matrix → cost = 0
+
+int Solve(int i, int j, vector<int> &nums,
+          vector<vector<int>> &dp) {
+    // 40, 20, 30, 10, 30
+    // Base case: no multiplication needed
+    if (i >= j)
+        return 0;
+
+    // Memoization check
+    if (dp[i][j] != -1)
+        return dp[i][j];
+
+    int ans = INT_MAX;
+
+    // Try all possible partition points
+    for (int k = i; k < j; k++) {
+
+        // Solve left and right partitions
+        int left  = Solve(i, k, nums, dp);
+        int right = Solve(k+1, j, nums, dp);
+
+        // Cost of multiplying two resulting matrices
+        int cost = nums[i - 1] * nums[k] * nums[j]
+                   + left + right;
+
+        // Take minimum among all partitions
+        ans = min(ans, cost);
+    }
+
+    // Store and return result
+    return dp[i][j] = ans;
+}
+
+int MCM(vector<int> &nums) {
+    int n = nums.size();
+
+    // dp[i][j] → minimum cost to multiply matrices i..j
+    vector<vector<int>> dp(n + 1, vector<int>(n + 1, -1));
+
+    return Solve(1, n - 1, nums, dp);
+}
+
+bool isPalindrome(string s, int i, int j){
+    while(i<=j){
+        if(s[i] != s[j])
+            return false;
+        i++;
+        j--;
+    }
+    return true;
+}
+int MinPalindromePartition_solve(int i, int j, string s,
+    vector<vector<int>> &dp){
+    if(i >= j)
+        return 0;
+    if(dp[i][j] != -1)
+        return dp[i][j];
+    if(isPalindrome(s, i, j)){
+        return dp[i][j] = 0;
+    }
+    int minCost = INT_MAX;
+    for(int k=i;k<j;k++){
+        int count = 1 + MinPalindromePartition_solve(i, k, s, dp) +
+                    MinPalindromePartition_solve(k+1, j, s, dp);
+        if(count < minCost){
+            minCost = count;
+        }
+    }
+    return dp[i][j] = minCost;
+}
+int MinPalindromePartition(string s){
+    int n = s.length();
+    vector<vector<int>> dp(n, vector<int>(n, -1));
+    return MinPalindromePartition_solve(0, n-1, s, dp);
+}
+
+int EvalExprToTrue_hlpr(string s, int i, int j, bool isTrue,
+                       map<tuple<int,int,bool>, int> &memo) {
+
+    // Base case: invalid range
+    if (i > j)
+        return 0;
+
+    // Base case: single operand
+    if (i == j) {
+        if (isTrue)
+            return s[i] == 'T';
+        else
+            return s[i] == 'F';
+    }
+
+    // Memoization key
+    // string key = to_string(i) + " " + to_string(j) + " " + to_string(isTrue);
+    if (memo.count({i, j, isTrue}))
+        return memo[{i, j, isTrue}];
+
+    int ans = 0;
+
+    // Partition expression at every operator
+    for (int k = i + 1; k < j; k += 2) {
+
+        // Recursively compute all possibilities
+        int LT = EvalExprToTrue_hlpr(s, i, k - 1, true, memo);
+        int LF = EvalExprToTrue_hlpr(s, i, k - 1, false, memo);
+        int RT = EvalExprToTrue_hlpr(s, k + 1, j, true, memo);
+        int RF = EvalExprToTrue_hlpr(s, k + 1, j, false, memo);
+
+        // Evaluate based on operator at position k
+        if (s[k] == '|') {
+            if (isTrue)
+                ans += LT * RT + LT * RF + LF * RT;
+            else
+                ans += LF * RF;
+        }
+        else if (s[k] == '&') {
+            if (isTrue)
+                ans += LT * RT;
+            else
+                ans += LF * RF + LT * RF + LF * RT;
+        }
+        else if (s[k] == '^') {
+            if (isTrue)
+                ans += LT * RF + LF * RT;
+            else
+                ans += LT * RT + LF * RF;
+        }
+    }
+
+    // Store result before returning
+    memo[{i, j, isTrue}] = ans;
+    return ans;
+}
+
+int EvalExprToTrue(string s) {
+    map<tuple<int,int,bool>, int> memo;
+    return EvalExprToTrue_hlpr(s, 0, s.length() - 1, true, memo);
+}
 
 
 int main(){
@@ -455,17 +612,21 @@ int main(){
     // vector<int> nums = {1, 2, 3};
     // cout<<"ANS: "<<min_coin_change(nums, 5);
 
-    string a = "abcdgh";
-    string b = "abedgh";
-    string c = "agtxbcbxhia";
-    string d = c;
-    reverse(d.begin(), d.end());
+    // string a = "abcdgh";
+    // string b = "abedgh";
+    // string c = "agtxbcbxhia";
+    // string d = c;
+    // reverse(d.begin(), d.end());
     // vector<vector<int>> dp(a.length()+1, vector<int>(b.length()+1, -1));
     // cout<<LCS_recursive(a, b, a.length(), b.length(), dp)<<"\n";
     // cout<<LCS_iterative(c, d);
-    string e = "AAEBCBDDXVXABDX";
+    // string e = "AAEBCBDDXVXABDX";
     
-    cout<<LongestCommonSubstring(c, d);
+    // vector<int> nums = {40, 20, 30, 10, 30};
+    // cout<<MCM(nums);
+
+    string s = "T|F&T^F";
+    cout<<EvalExprToTrue(s);
 
     return 0;
 }
