@@ -447,6 +447,10 @@ string LongestRepeatingSubsequence(string s) {
     return ans;
 }
 
+int LexicographicallyGreaterCount(string s, string t){
+    return 0;
+}
+
 
 // ***** Matrix Chain Multiplication *****
 // Pattern: Partition DP (Matrix Chain Multiplication)
@@ -606,6 +610,36 @@ int EvalExprToTrue(string s) {
     return EvalExprToTrue_hlpr(s, 0, s.length() - 1, true, memo);
 }
 
+int EggDroppingProblem_hlpr(int e, int s, int t, map<tuple<int, int, int>, int> &dp){
+    if(e==0){
+        return 0;
+    }
+    if(s>t){
+        return 0;
+    }
+    if(e==1){
+        return t-s+1;
+    }
+    if(t == s){
+        return 1;
+    }
+    if(dp.count({e, s, t})){
+        return dp[{e, s, t}];
+    }
+    int ans = INT_MAX;
+    for(int k=s;k<=t;k++){
+        int brk = 1 + EggDroppingProblem_hlpr(e-1, s, k-1, dp);
+        int notbrk = 1 + EggDroppingProblem_hlpr(e, k+1, t, dp);
+        ans = min(ans, brk + notbrk);
+    }
+    return dp[{e, s, t}] = ans;
+}
+
+int EggDroppingProblem(int e, int f){
+    map<tuple<int, int, int>, int> dp;
+    return EggDroppingProblem_hlpr(e, 1, f, dp);
+}
+
 
 int main(){
     
@@ -625,8 +659,10 @@ int main(){
     // vector<int> nums = {40, 20, 30, 10, 30};
     // cout<<MCM(nums);
 
-    string s = "T|F&T^F";
-    cout<<EvalExprToTrue(s);
+    // string s = "T|F&T^F";
+    // cout<<EvalExprToTrue(s);
+
+    cout<<EggDroppingProblem(3, 5);
 
     return 0;
 }

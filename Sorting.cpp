@@ -213,10 +213,54 @@ vector<int> ProdExceptSelf(vector<int> arr){
     return ans;
 }
 
-int main(){
-    vector<int> arr = {1};
-    vector<int> ans = ProdExceptSelf(arr);
-    for(int i=0;i<ans.size();i++){
-        cout<<ans[i]<<" ";
+int MinOps(vector<int> &weights, vector<int> &dist){
+    unordered_map<int, int> mp;
+    int n = weights.size();
+    int nxtPos = -1;
+    for(int i=0;i<n;i++){
+        mp[weights[i]] = i;
     }
+    sort(weights.begin(), weights.end());
+    int ans = 0;
+    nxtPos = mp[weights[0]]+1;
+    for(int i=1;i<n;i++){
+        int idx = mp[weights[i]];
+        int steps = (idx >= nxtPos) ? 0 : (nxtPos - idx);
+        int jumps = (int) ceil((double) steps/dist[idx]);
+        ans += jumps;
+        nxtPos = idx + (dist[idx]*jumps + 1);
+    }
+    return ans;
+}
+
+vector<int> findRequestTarget(const int n, const vector<int>& requests) {
+    vector<int> assigned(n);
+    // 3, 2, 3, 2, 4
+    unordered_map<int, int> next;
+    vector<int> ret; ret.reserve(requests.size());
+    for (const auto r : requests) {
+        const int cnt = assigned[r], idx = next[cnt];
+        ret.push_back(idx);
+        assigned[idx]++;
+        next[cnt]++;
+    }
+    return ret;
+}
+
+int main(){
+    // vector<int> weights = {3,6,5,2};
+    // vector<int> dist = {4,3,2,1};
+
+    // cout<<MinOps(weights, dist);
+
+    vector<int> req = {3, 2, 3, 2, 4};
+    int servers = 5;
+    vector<int> res = findRequestTarget(servers, req);
+
+    for(auto it: res){
+        cout<<it<<" ";
+    }
+    cout<<"\n";
+    
+    return 0;
 }

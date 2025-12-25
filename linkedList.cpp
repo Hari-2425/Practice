@@ -5,8 +5,6 @@ using namespace std;
 
 class Node{
     private:
-        
-        
     
     public:
         int data;
@@ -377,13 +375,54 @@ Node* mergeSort(Node* head){
     return merge(left, right);
 }
 
+// 1->2->3->4->5->6
+
+int FindMaxPairs(Node* root){
+    Node* slow = root;
+    Node* fast = root;
+    Display(root);
+    while(fast->next!=nullptr && fast->next->next!=nullptr){
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    if(fast->next!=nullptr && fast->next->next==nullptr){
+        fast = fast->next;
+        // slow = slow->next;
+    }
+    Node* curr = slow->next;
+    slow->next = nullptr;
+    while(curr!=nullptr){
+        //temp = curr.next
+        //curr.next = slow;
+        //slow = curr;
+        //curr = temp
+        Node* tmp = curr->next;
+        curr->next = slow;
+        slow = curr;
+        curr = tmp;
+    }
+    
+    curr = root;
+    int max_ans = INT_MIN;
+    while(curr!=nullptr && fast!=nullptr && curr!=fast){
+        max_ans = max(curr->data + fast->data, max_ans);
+        curr = curr->next;
+        fast = fast->next;
+    }
+    
+    return max_ans;
+}
+
+
 int main(){
     Node *head;
-    vector<int> arr = {1, 2, 4, 4, 3, 2, 1};
+    vector<int> arr = {1, 2, 1, 1, 8};
     head = ArrayToLlst(arr);
 
-    Node* sortedHead = mergeSort(head);
-    Display(sortedHead);
+    // Node* sortedHead = mergeSort(head);
+    // Display(sortedHead);
+
+    cout<<FindMaxPairs(head);
 
     return 0;
 
