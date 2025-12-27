@@ -265,7 +265,6 @@ int remove_max_char(string s){
         return n-1;
     
     int ans = 0;
-    int i=1, j=n-2;
 
     for(int i=1;i<n-1;i++){
         if(s[i]==last){
@@ -278,6 +277,51 @@ int remove_max_char(string s){
     return ans;
 }
 
+int maxPackages(vector<int>& itemCost) {
+    int n = itemCost.size();
+    sort(itemCost.begin(), itemCost.end());
+
+    long long totalSum = 0;
+    for (int x : itemCost) totalSum += x;
+
+    int maxVal = itemCost.back();
+    int ans = 1; // at least 1 package always possible
+
+    // Try all possible target sums
+    for (long long S = maxVal; S <= totalSum; S++) {
+        if (totalSum % S != 0) continue;
+
+        int packages = totalSum / S;
+        int l = 0, r = n - 1;
+        bool ok = true;
+
+        while (l <= r) {
+            if (itemCost[r] > S) {
+                ok = false;
+                break;
+            }
+
+            if (itemCost[r] == S) {
+                r--;
+            } else {
+                if (itemCost[l] + itemCost[r] == S) {
+                    l++; r--;
+                } else if (itemCost[l] + itemCost[r] < S) {
+                    l++;
+                } else {
+                    ok = false;
+                    break;
+                }
+            }
+        }
+
+        if (ok)
+            ans = max(ans, packages);
+    }
+
+    return ans;
+}
+
 
 int main(){
     
@@ -287,8 +331,8 @@ int main(){
     // vector<int> sideLen = {2, 3, 3, 4, 6, 6, 8, 8};
     // cout<<getMaxTotalArea(sideLen);
 
-    cout<<remove_max_char("andjruiwepmcamdcaljvsdlsalmfwebfnsavvbaepokfananleflf")<<"\n";
-    string s = "andjruiwepmcamdcaljvsdlsalmfwebfnsavvbaepokfananleflf";
-    cout<<s.length();
+    vector<int> arr = {1,2,3,4,5};
+    cout<<maxPackages(arr);
+
     return 0;
 }
