@@ -447,6 +447,44 @@ string LongestRepeatingSubsequence(string s) {
     return ans;
 }
 
+int LexicographicallyGreaterCount_hlpr(int i, int j, int grtr,
+    string s, string t, unordered_map<string, int> &dp){
+    int MOD = 1e9+7;
+    if(i == s.size()){
+        return (grtr == 1) ? 1 : 0;
+    }
+    string key = to_string(i) + " " + to_string(j) + " " + to_string(grtr);
+    if(dp.find(key) != dp.end()){
+        return dp[key];
+    }
+
+    long long res = 0;
+    // skip s[i]
+    res = LexicographicallyGreaterCount_hlpr(i+1, j, grtr, s, t, dp) % MOD;
+
+    // take s[i]
+    if(grtr){
+        // Already lex greater
+        res = (res + LexicographicallyGreaterCount_hlpr(i+1, j, 1, s, t, dp)) % MOD;
+    }
+    else{
+        // Still matching
+        if(j < t.size()){
+            if(s[i] > t[j]){
+                res = (res + LexicographicallyGreaterCount_hlpr(i+1, j+1, 1, s, t, dp))%MOD;
+            }
+            else if(s[i]==s[j]){
+                res = (res + LexicographicallyGreaterCount_hlpr(i+1, j+1, 0, s, t, dp))%MOD;
+            }
+        }
+        else{
+            // t exhausted
+            res = (res + LexicographicallyGreaterCount_hlpr(i+1, j, 1, s, t, dp))%MOD;
+        }
+    }
+    return dp[key] = res;
+}
+
 int LexicographicallyGreaterCount(string s, string t){
     return 0;
 }
@@ -639,6 +677,7 @@ int EggDroppingProblem(int e, int f){
     map<tuple<int, int, int>, int> dp;
     return EggDroppingProblem_hlpr(e, 1, f, dp);
 }
+
 
 
 int main(){
