@@ -678,7 +678,118 @@ int EggDroppingProblem(int e, int f){
     return EggDroppingProblem_hlpr(e, 1, f, dp);
 }
 
+bool isMatch(string s, string p) {
+    int m=s.length(), n=p.length();
+    vector<vector<bool>> dp(m+1, vector<bool>(n+1, false));
+    dp[0][0] = 1;
+    
+    for(int i=2;i<=n;i++){
+        if(p[i-1]=='*')
+            dp[0][i] = dp[0][i-2];
+    }
 
+    for(int i=1;i<=m;i++){
+        for(int j=1;j<=n;j++){
+            char s_char = s[i-1];
+            char p_char = p[j-1];
+            if(s_char==p_char || p_char=='.'){
+                dp[i][j] = dp[i-1][j-1] && true;
+            }
+            else{
+                if(p_char=='*'){
+                    dp[i][j] = dp[i][j-2];
+                    if(p[j-2]==s_char || p[j-2]=='.'){
+                         dp[i][j] = dp[i][j] || dp[i-1][j];
+                    }
+                }
+            }
+        }
+    }
+    return dp[m][n];
+}
+
+bool WildCardMatchingHlpr(int i, int j, string &s, string &p,
+    map<tuple<int, int>, bool> &dp)
+{
+    if(j==p.length()){ // Pattern is over
+        return i == s.length();
+    }
+    if(i==s.length()){ // main string is over
+        for(int k=j;k<p.length();k++){
+            if(p[k]!='*')
+                return false;
+        }
+        return true;
+    }
+    if(dp.count({i, j})){
+        return dp[{i, j}];
+    }
+    bool res = false;
+    if(s[i]==p[j] || p[j]=='?'){
+        res = WildCardMatchingHlpr(i+1, j+1, s, p, dp);
+    }
+    else if(p[j]=='*'){
+        // res = empty pattern || non-empty pattern
+        res = WildCardMatchingHlpr(i, j+1, s, p, dp) ||
+            WildCardMatchingHlpr(i+1, j, s, p, dp);
+    }
+    return dp[{i, j}] = res;
+}
+
+bool WildCardMatching(string s, string p){
+    int m = s.length(), n = p.length();
+    vector<vector<bool>> dp(m+1, vector<bool>(n+1, false));
+    dp[0][0] = 1;
+    for(int j=1;j<=n;j++){
+        if(p[j-1]=='*'){
+            dp[0][j] = dp[0][j-1];
+        }
+    }
+
+    for(int i=1;i<=m;i++){
+        for(int j=1;j<=n;j++){
+            if(s[i-1]==p[j-1] || p[j-1]=='?'){
+                dp[i][j] = dp[i-1][j-1];
+            }
+            else if(p[j-1]=='*'){
+                dp[i][j] = dp[i-1][j] || dp[i-1][j];
+            }
+        }
+    }
+    return dp[m][n];
+}
+
+int minDistanceHlpr(int i, int j, string &w1, string &w2,
+    map<tuple<int, int>, int> &dp){
+    
+    if(i == w1.length()){ // w1 exhausted
+        return w2.length() - j; // Add remaining chars 
+    }
+    if(j == w2.length()){ // w2 exhausted
+        return w1.length() - i; // Delete remaining chars
+    }
+
+    if(dp.count({i, j})){
+        return dp[{i, j}];
+    }
+
+    int ans = INT_MAX;
+    if(w1[i] == w2[j]){
+        ans =  minDistanceHlpr(i+1, j+1, w1, w2, dp);
+    }
+    else{
+        int insert = 1 + minDistanceHlpr(i, j+1, w1, w2, dp);
+        int del = 1 + minDistanceHlpr(i+1, j, w1, w2, dp);
+        int replace = 1 + minDistanceHlpr(i+1, j+1, w1, w2, dp);
+        ans = min(insert, min(del, replace));
+    }
+    return dp[{i, j}] = ans;
+}
+
+int minDistance(string word1, string word2) {
+    map<tuple<int, int>, int> dp;
+    return minDistanceHlpr(0, 0, word1, word2, dp);
+}
 
 int main(){
     
@@ -701,7 +812,12 @@ int main(){
     // string s = "T|F&T^F";
     // cout<<EvalExprToTrue(s);
 
-    cout<<EggDroppingProblem(3, 5);
+    if(WildCardMatching("cb", "?a")){
+        cout<<"Match\n";
+    }
+    else{
+        cout<<"Not a Match\n";
+    }
 
     return 0;
 }

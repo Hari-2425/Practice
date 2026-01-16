@@ -131,7 +131,7 @@ class ParkingLot{
 
 class PaymentStrategy{
     public:
-    virtual void pay(int amount) = 0;  // pure virtual
+    virtual void pay(double amount) = 0;  // pure virtual
     virtual ~PaymentStrategy() = default;
 };
 
@@ -150,6 +150,20 @@ struct CashPayment: public PaymentStrategy{
 struct UPIPayment: public PaymentStrategy{
     void pay(double amount) {
         cout << "Paid ₹" << amount << " using UPI\n";
+    }
+};
+
+class PaymentService{
+    public:
+    PaymentStrategy* paymentStrategy;
+    PaymentService(PaymentStrategy* paymentStrategy){
+        paymentStrategy = paymentStrategy;
+    }
+    void SetStrategy(PaymentStrategy* paymentStrategy){
+        paymentStrategy = paymentStrategy;
+    }
+    void MakePayment(double amount){
+        paymentStrategy->pay(amount);
     }
 };
 

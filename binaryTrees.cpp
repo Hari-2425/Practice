@@ -92,39 +92,6 @@ bool isValidBST_hlpr(TreeNode* root, int left_max, int right_min){
 
 bool isValidBST(TreeNode* root) {
 
-    // Approach:
-    // Use BFS
-    // queue ek object push krna hai, Object mei 3 values hongi:
-    // first - current node
-    // second - left min
-    // third - right max
-
-
-    // using pii = pair<int, int>;
-    // if(!root) return true;
-    // queue<pair<TreeNode*, pii>> qu;
-    // qu.push({root, {INT_MIN, INT_MAX}});
-    // while(!qu.empty()){
-
-    //     auto node = qu.front();
-    //     qu.pop();
-    //     int left_val = node.second.first;
-    //     int right_val = node.second.second;
-
-    //     if(node.first->val<=left_val || node.first->val>=right_val)
-    //         return false;
-        
-    //     if(node.first->left != nullptr){
-    //         qu.push({node.first->left, {left_val, node.first->val}});
-    //     }
-
-    //     if(node.first->right != nullptr){
-    //         qu.push({node.first->right, {node.first->val, right_val}});
-    //     }
-
-    // }
-
-    // return true;
     int left = INT_MIN, right = INT_MAX;
     return isValidBST_hlpr(root, left, right);
 }
@@ -247,6 +214,37 @@ Node* clone(Node* node, unordered_map<Node*, Node*> &oldToNew){
 Node* cloneGraph(Node* node) {
     unordered_map<Node*, Node*> oldToNew;
     return clone(node, oldToNew);
+}
+
+//  Input: preorder = [1,2,3,4], inorder = [2,1,3,4]
+
+// Output: [1,2,3,null,null,null,4]
+int pre_idx = 0;
+TreeNode* buildTree_hlpr(int start, int end, 
+    vector<int> &preorder, vector<int> &inorder, unordered_map<int, int> &mp){
+    if(start>end){
+        return nullptr;
+    }
+
+    //Create root from preOrder
+    int root_val = preorder[pre_idx++];
+    TreeNode* root = new TreeNode(root_val);
+
+    //Find root in hash map
+    int mid = mp[root_val];
+
+    root->left = buildTree_hlpr(start, mid-1, preorder, inorder, mp);
+    root->right = buildTree_hlpr(mid+1, end, preorder, inorder, mp);
+    return root;
+}
+
+TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+    int n = preorder.size();
+    unordered_map<int, int> mp;
+    for(int i=0;i<n;i++){
+        mp[inorder[i]] = i;
+    }
+    return buildTree_hlpr(0, n-1, preorder, inorder, mp);
 }
 
 int nain(){

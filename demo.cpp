@@ -4,6 +4,13 @@
 #include<fstream>
 using namespace std;
 
+void display(vector<int> &v){
+    for(auto it: v){
+        cout<<it<<" ";
+    }
+    cout<<"\n";
+}
+
 vector<int> cyclicalTraversal(vector<vector<int>> v, int &top, int &bottom, int &left, int &right){
     
     vector<int> res;
@@ -1082,15 +1089,264 @@ long long interactionCosts(int n, vector<vector<int>>& edges,
     return cost;
 }
 
+string largestEven(string s) {
+    while(s.size()>0 && s.back()=='1'){
+        s.pop_back();
+    }
+    return s;
+}
+
+//[  t       l     r      b
+//["able","area","echo","also"],
+//["area","able","also","echo"]
+//]
+vector<vector<string>> wordSquares(vector<string>& words) {
+    vector<vector<string>> ans;
+    int n = words.size();
+    for(int i=0;i<n;i++){
+        for(int j=0;j<n;j++){
+            if(i==j) continue;
+            for(int k=0;k<n;k++){
+                if(k==i || k==j) continue;
+                for(int l=0;l<n;l++){
+                    if(l==k || l==j || l==i) continue;
+
+                    string top = words[i];
+                    string left = words[j];
+                    string right = words[k];
+                    string bottom = words[l];
+
+                    if(top[0]==left[0] && top[3]==right[0] &&
+                        left[3]==bottom[0] && bottom[3]==right[3]){
+                            ans.push_back({top, left, right, bottom});
+                        }
+
+                }
+            }
+        }
+    }
+    sort(ans.begin(), ans.end());
+    return ans;
+}
+
+long long minimumCost(string s, string t, int flipCost, int swapCost, int crossCost) {
+    int n = s.size();
+    long long A = 0, B = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (s[i] != t[i]) {
+            if (s[i] == '0') A++;
+            else B++;
+        }
+    }
+
+    long long singleCost = min(flipCost, crossCost);
+    long long cost = 0;
+
+    if (swapCost < 2 * singleCost) {
+        long long pairs = min(A, B);
+        cost += pairs * swapCost;
+        A -= pairs;
+        B -= pairs;
+    }
+
+    cost += (A + B) * singleCost;
+    return cost;
+}
+
+int absDifference(vector<int>& nums, int k) {
+    sort(nums.begin(), nums.end());
+    int i=0, j=nums.size()-1, sum1=0, sum2=0;
+    while(k>0){
+        sum1 += nums[i];
+        sum2 += nums[j];
+        i++;
+        j--;
+        k--;
+    }
+    return abs(sum1-sum2);
+}
+
+bool isVowel(char ch){
+    if(ch=='a' || ch=='e' || ch=='i' || ch=='o' || ch=='u'){
+        return true;
+    }
+    return false;
+}
+
+string reverseWords(string s) {
+    int n = s.length(), vowCount=0;
+    int i=0;
+    while(s[i]!=' '){
+        if(isVowel(s[i])){
+            vowCount++;
+        }
+        i++;
+    }
+    while(i < n){
+        i++;
+        int start = i;
+        int count=0;
+        while(s[i]!=' ' && i<n){
+            if(isVowel(s[i])){
+                count++;
+            }
+            i++;
+        }
+        if(count == vowCount){
+            reverse(s.begin()+start, s.begin()+i);
+        }
+    }
+    return s;
+}
+
+long long minMoves(vector<int>& balance) {
+    int n = balance.size(), negIdx=-1;
+    long long totSum = 0, ans = 0;
+    priority_queue<int> pq;
+    for(int i=0;i<n;i++){
+        totSum += balance[i];
+        if(balance[i]<0){
+            negIdx = i;
+        }
+        else{
+            pq.push(balance[i]);
+        }
+    }
+    if(totSum < 0){
+        return -1;
+    }
+    // // Left Side
+    // for(int i=negIdx-1;i>=0 && balance[negIdx]<0;i--){
+    //     int dis = abs(negIdx-i);
+    //     int diff = 0;
+    //     if(abs(balance[negIdx]) >= balance[i]){
+            
+    //         diff = balance[i];
+    //         ans += dis*(balance[i]);
+    //         balance[negIdx] += balance[i];
+    //     }
+    //     else{
+            
+    //         diff = abs(balance[negIdx]);
+    //         ans += dis*(abs(balance[negIdx]));
+    //         balance[negIdx] = 0;
+    //     }
+    // }
+    // // Left Side
+    // for(int i=negIdx+1;i<n && balance[negIdx]<0;i++){
+    //     int dis = abs(negIdx-i);
+    //     int diff = 0;
+    //     if(abs(balance[negIdx]) >= balance[i]){
+            
+    //         diff = balance[i];
+    //         ans += dis*(balance[i]);
+    //         balance[negIdx] += balance[i];
+    //     }
+    //     else{
+            
+    //         diff = abs(balance[negIdx]);
+    //         ans += dis*(abs(balance[negIdx]));
+    //         balance[negIdx] = 0;
+    //     }
+    // }
+
+    while (!pq.empty() && balance[negIdx]<0){
+        if(abs(balance[negIdx] >= pq.top())){
+            ans += pq.top();
+            balance[negIdx] += pq.top();
+        }
+        else{
+            ans += abs(balance[negIdx]);
+            balance[negIdx] = 0;
+        }
+        pq.pop();
+    }
+    
+    if(balance[negIdx] < 0) return -1;
+    return ans;
+}
+
+bool hasMatch(string s, string p) {
+    // if * is at 0
+    if(p[0]=='*'){
+        int i=0;
+
+        while(s[i]!=p[1]){
+            i++;
+        }
+        int j=1;
+        while(i<s.length() && j<p.length() && s[i]==p[j]){
+            i++;
+            j++;
+        }
+        return j==p.length();
+    }
+
+    // if * is in mid somewhere
+    else if(p[p.length()-1]=='*'){
+        int i=0, j=0;
+        while(i<s.length() && j<p.length() && s[i]!=p[j]){
+            i++;
+        }
+        while(i<s.length() && j<p.length() && s[i]==p[j]){
+            i++;
+            j++;
+        }
+        return p[j]=='*';
+    }
+
+    
+    // if * is at end
+}
+
+vector<int> twoSum(vector<int>& numbers, int target) {
+    int n = numbers.size();
+    int i=0, j=n-1;
+    while (i < j){
+        int sum = numbers[i] + numbers[j];
+        if(sum == target){
+            return {i+1, j+1};
+        }
+        else if(sum < target){
+            i++;
+        }
+        else{
+            j--;
+        }
+    }
+    return {};
+}
+
+string minWindow(string s, string t) {
+    vector<int> freq(128, 0);
+    for(char c : t) freq[c]++;
+
+    int required = t.size();
+    int l = 0, minLen = INT_MAX, start = 0;
+
+    for(int r = 0; r < s.size(); r++){
+        if(freq[s[r]] > 0) required--;
+        freq[s[r]]--;
+
+        while(required == 0){
+            if(r - l + 1 < minLen){
+                minLen = r - l + 1;
+                start = l;
+            }
+            freq[s[l]]++;
+            if(freq[s[l]] > 0) required++;
+            l++;
+        }
+    }
+    return minLen == INT_MAX ? "" : s.substr(start, minLen);
+}
+
+
 int main(){
     
-    vector<vector<int>> edges = {
-        {0, 1},
-        {0, 2},
-        {0, 3}
-    };
-    vector<int> groups = {1,1,4,4};
-    cout<<interactionCosts(4, edges, groups);
+    vector<int> bal = {5,1,-4};
+    cout<<minMoves(bal);
 
     return 0;
 }
