@@ -1216,40 +1216,6 @@ long long minMoves(vector<int>& balance) {
     if(totSum < 0){
         return -1;
     }
-    // // Left Side
-    // for(int i=negIdx-1;i>=0 && balance[negIdx]<0;i--){
-    //     int dis = abs(negIdx-i);
-    //     int diff = 0;
-    //     if(abs(balance[negIdx]) >= balance[i]){
-            
-    //         diff = balance[i];
-    //         ans += dis*(balance[i]);
-    //         balance[negIdx] += balance[i];
-    //     }
-    //     else{
-            
-    //         diff = abs(balance[negIdx]);
-    //         ans += dis*(abs(balance[negIdx]));
-    //         balance[negIdx] = 0;
-    //     }
-    // }
-    // // Left Side
-    // for(int i=negIdx+1;i<n && balance[negIdx]<0;i++){
-    //     int dis = abs(negIdx-i);
-    //     int diff = 0;
-    //     if(abs(balance[negIdx]) >= balance[i]){
-            
-    //         diff = balance[i];
-    //         ans += dis*(balance[i]);
-    //         balance[negIdx] += balance[i];
-    //     }
-    //     else{
-            
-    //         diff = abs(balance[negIdx]);
-    //         ans += dis*(abs(balance[negIdx]));
-    //         balance[negIdx] = 0;
-    //     }
-    // }
 
     while (!pq.empty() && balance[negIdx]<0){
         if(abs(balance[negIdx] >= pq.top())){
@@ -1342,6 +1308,30 @@ string minWindow(string s, string t) {
     return minLen == INT_MAX ? "" : s.substr(start, minLen);
 }
 
+vector<int> ansFunc(vector<int> state, vector<string> &ops){
+    int n = state.size();
+    priority_queue<int, vector<int>, greater<int>> pq;
+    for(int i=0;i<n;i++){
+        if(state[i]==0){
+            pq.push(i);
+        }
+    }
+    for(auto op: ops){
+        if(op == "L"){
+            if(!pq.empty()){
+                int idx = pq.top();
+                pq.pop();
+                state[idx] = 1;
+            }
+        }
+        else{
+            int idx = stoi(op.substr(1));
+            state[idx] = 0;
+            pq.push(idx);
+        }
+    }
+    return state;
+}
 
 int main(){
     

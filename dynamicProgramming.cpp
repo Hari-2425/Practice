@@ -791,6 +791,35 @@ int minDistance(string word1, string word2) {
     return minDistanceHlpr(0, 0, word1, word2, dp);
 }
 
+int minimumTotal_hlpr(int i, int j, vector<vector<int>> &triangle, 
+    map<tuple<int, int>, int> &dp){
+    if(i>=triangle.size() || j>=triangle[i].size()){
+        return 0;
+    }
+    if(dp.count({i, j})){
+        return dp[{i, j}];
+    }
+    int ans1 = triangle[i][j] + minimumTotal_hlpr(i+1, j, triangle, dp);
+    int ans2 = triangle[i][j] + minimumTotal_hlpr(i+1, j+1, triangle, dp);
+    return dp[{i, j}] = min(ans1, ans2);
+}
+
+int minimumTotal(vector<vector<int>>& triangle) {
+    // map<tuple<int, int>, int> dp;
+    // return minimumTotal_hlpr(0, 0, triangle, dp);
+
+    int m = triangle.size();
+    int n = triangle[m-1].size();
+    vector<vector<int>> dp(m+1, vector<int>(n+1, 0));
+    
+    for(int i=1;i<=m;i++){
+        for(int j=1;j<=triangle[i-1].size();j++){
+
+        }
+    }
+
+}
+
 int main(){
     
     // vector<int> nums = {1, 2, 3};
