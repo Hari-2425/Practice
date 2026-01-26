@@ -132,45 +132,45 @@ int maxSubarraySum(vector<int> nums, int k){
     return maxSum;
 }
 
-string minWindow(string s, string t){
-    if(t.size() == 0){
-        return "";
-    }
-    unordered_map<char, int> mps, mpt;
-    for(auto i: t){
-        mpt[i]++;
-    }
-    int start_index = -1;
-    int left=0, right=0, minLen=1e9, formed=0;
+// string minWindow(string s, string t){
+//     if(t.size() == 0){
+//         return "";
+//     }
+//     unordered_map<char, int> mps, mpt;
+//     for(auto i: t){
+//         mpt[i]++;
+//     }
+//     int start_index = -1;
+//     int left=0, right=0, minLen=1e9, formed=0;
 
-    for(;right<s.length();++right){
-        char currChar = s[right];
-        mps[currChar]++;
-        if(mpt.count(currChar) && mpt[currChar]==mps[currChar]){
-            formed++;
-        }
-        while (left<=right && formed==mpt.size())
-        {
-            currChar = s[left];
-            if(right-left+1 < minLen){
-                minLen = right-left+1;
-                start_index = left;
-            }
+//     for(;right<s.length();++right){
+//         char currChar = s[right];
+//         mps[currChar]++;
+//         if(mpt.count(currChar) && mpt[currChar]==mps[currChar]){
+//             formed++;
+//         }
+//         while (left<=right && formed==mpt.size())
+//         {
+//             currChar = s[left];
+//             if(right-left+1 < minLen){
+//                 minLen = right-left+1;
+//                 start_index = left;
+//             }
 
-            mps[currChar]--;
-            if(mpt.count(currChar) && mps[currChar]<mpt[currChar]){
-                formed--;
-            }
+//             mps[currChar]--;
+//             if(mpt.count(currChar) && mps[currChar]<mpt[currChar]){
+//                 formed--;
+//             }
 
-            left++;
-        }
+//             left++;
+//         }
         
-    }
-    if(start_index == -1){
-        return "";
-    }
-    return s.substr(start_index, minLen);
-}
+//     }
+//     if(start_index == -1){
+//         return "";
+//     }
+//     return s.substr(start_index, minLen);
+// }
 
 struct node
 {
@@ -1333,10 +1333,109 @@ vector<int> ansFunc(vector<int> state, vector<string> &ops){
     return state;
 }
 
+vector<int> rightSideView(TreeNode* root) {
+    if(!root){
+        return {};
+    }
+    queue<TreeNode*> qu;
+    qu.push(root);
+    vector<int> res;
+    while(!qu.empty()){
+        int qu_size = qu.size();
+        while(qu_size>0){
+            TreeNode* qfv = qu.front();
+            qu.pop();
+            if(qu_size == 1){
+                res.push_back(qfv->val);
+            }
+
+            if(qfv->left){
+                qu.push(qfv->left);
+            }
+            if(qfv->right){
+                qu.push(qfv->right);
+            }
+
+            qu_size--;
+        }
+    }
+    return res;
+}
+
+int minTime_hlpr(int node, vector<vector<int>> &adj, 
+    vector<bool> &hasApple, vector<bool> &vis){
+    vis[node] = 1;
+    int time = 0;
+    for(auto nbr: adj[node]){
+        if(!vis[nbr]){
+            time += minTime_hlpr(nbr, adj, hasApple, vis);
+        }
+    }
+    if(time>0 || hasApple[node]){
+        return time+2;
+    }
+    return time;
+}
+
+int minTime(int n, vector<vector<int>>& edges, vector<bool>& hasApple) {
+    vector<vector<int>> adj(n);
+    for(auto e: edges){
+        int u = e[0];
+        int v = e[1];
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    vector<bool> vis(n, 0);
+    int time = minTime_hlpr(0, adj, hasApple, vis)-2;
+    return (time<0)?0:time;
+}
+
+int countHighestScoreNodes_dfs(int node, vector<vector<int>> &adj, vector<int> &weight){
+    int sz = 1;
+    for(auto nbr: adj[node]){
+        sz += countHighestScoreNodes_dfs(nbr, adj, weight);
+    }
+    weight[node] = sz;
+    return sz;
+}
+
+int countHighestScoreNodes(vector<int>& parents) {
+    int n = parents.size();
+    vector<vector<int>> adj(n);
+    vector<int> weight(n);
+
+    for(int i=1;i<n;i++){
+        adj[parents[i]].push_back(i);
+    }
+
+    countHighestScoreNodes_dfs(0, adj, weight);
+    long long maxScore = 0;
+    int count = 0;
+
+    for(int i=0;i<n;i++){
+        int score = 1;
+        int rest = n-weight[i];
+        if(rest > 0){
+            score *= rest;
+        }
+        for(int child: adj[i]){
+            score *= weight[child];
+        }
+        if(score > maxScore){
+            maxScore = score;
+            count = 1;
+        }
+        else if(score == maxScore){
+            count++;
+        }
+    }
+    return maxScore;
+}
+
 int main(){
     
-    vector<int> bal = {5,1,-4};
-    cout<<minMoves(bal);
+    vector<int> par = {-1,2,0};
+    cout<<countHighestScoreNodes(par);
 
     return 0;
 }
