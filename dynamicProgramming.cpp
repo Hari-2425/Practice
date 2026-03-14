@@ -804,49 +804,47 @@ int minimumTotal_hlpr(int i, int j, vector<vector<int>> &triangle,
     return dp[{i, j}] = min(ans1, ans2);
 }
 
-int minimumTotal(vector<vector<int>>& triangle) {
-    // map<tuple<int, int>, int> dp;
-    // return minimumTotal_hlpr(0, 0, triangle, dp);
 
-    int m = triangle.size();
-    int n = triangle[m-1].size();
-    vector<vector<int>> dp(m+1, vector<int>(n+1, 0));
-    
-    for(int i=1;i<=m;i++){
-        for(int j=1;j<=triangle[i-1].size();j++){
+long long minArraySum(vector<int>& nums, int k) {
+    vector<long long> dp(k, LLONG_MAX);
+    dp[0] = 0;
+    long long res = 0;
+    for (int a : nums) {
+        res += a;
+        res = dp[res % k] = min(dp[res % k], res);
+    }
+    return res;
+}
 
+int longestSubsequence(vector<int>& nums) {
+    vector<vector<int>> dp(302, vector<int>(302));
+
+    for (int i = nums.size() - 1; i >= 0; --i){
+        int num = nums[i];
+
+        for (int next = 1; next <= 300; ++next){
+            int diff = abs(next - num);
+            dp[num][diff] = max(dp[num][diff], dp[next][diff] + 1);
+        }
+
+        for (int j = 1; j <= 300; ++j){
+            dp[num][j] = max(dp[num][j], dp[num][j - 1]);
         }
     }
 
+    int ans = INT_MIN;
+    for (int i = 0; i <= 301; ++i){
+        for (int j = 0; j <= 301; ++j){
+            ans = max(ans, dp[i][j]);
+        }
+    }
+
+    return ans;
 }
 
 int main(){
-    
-    // vector<int> nums = {1, 2, 3};
-    // cout<<"ANS: "<<min_coin_change(nums, 5);
-
-    // string a = "abcdgh";
-    // string b = "abedgh";
-    // string c = "agtxbcbxhia";
-    // string d = c;
-    // reverse(d.begin(), d.end());
-    // vector<vector<int>> dp(a.length()+1, vector<int>(b.length()+1, -1));
-    // cout<<LCS_recursive(a, b, a.length(), b.length(), dp)<<"\n";
-    // cout<<LCS_iterative(c, d);
-    // string e = "AAEBCBDDXVXABDX";
-    
-    // vector<int> nums = {40, 20, 30, 10, 30};
-    // cout<<MCM(nums);
-
-    // string s = "T|F&T^F";
-    // cout<<EvalExprToTrue(s);
-
-    if(WildCardMatching("cb", "?a")){
-        cout<<"Match\n";
-    }
-    else{
-        cout<<"Not a Match\n";
-    }
+    vector<int> nums = {10,20,10,19,10,20};
+    cout<<longestSubsequence(nums);
 
     return 0;
 }

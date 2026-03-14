@@ -413,6 +413,63 @@ int FindMaxPairs(Node* root){
     return max_ans;
 }
 
+Node* Summation(Node* num1, Node* num2){
+
+    // if No is 23
+    // 3 -> 2 -> null
+
+    if(!num1){
+        if(!num2) return nullptr;
+        return num2;
+    }
+    else if(!num2){
+        return num1;
+    }
+
+    Node* ans = new Node(0);
+    Node* curr;
+    curr = ans;
+    Node* p1 = num1;
+    Node* p2 = num2; 
+    int carry = 0;
+
+    while (p1!=nullptr && p2!=nullptr)
+    {
+        /* code */
+        int sum = p1->data + p2->data + carry;
+        int val = sum%10;
+        carry = sum/10;
+        curr->next = new Node(val);
+        p1 = p1->next;
+        p2 = p2->next;
+        curr = curr->next;
+    }
+    
+    while(p1!=nullptr){
+        int sum = p1->data + carry;
+        int val = sum%10;
+        carry = sum/10;
+        curr->next = new Node(val);
+        p1 = p1->next;
+        curr = curr->next;
+    }
+
+    while(p2!=nullptr){
+        int sum = p2->data + carry;
+        int val = sum%10;
+        carry = sum/10;
+        curr->next = new Node(val);
+        p2 = p2->next;
+        curr = curr->next;
+    }
+
+    if(carry>0){
+        curr->next = new Node(carry);
+    }
+
+    return ans->next;
+}
+
 
 int main(){
     Node *head;

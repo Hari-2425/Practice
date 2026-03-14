@@ -1432,10 +1432,141 @@ int countHighestScoreNodes(vector<int>& parents) {
     return maxScore;
 }
 
+int maxProduct_hlpr(int n, set<int> &tmpSet){
+    int numBits = (int)log2(n) + 1; // number of bits in n
+
+    for (int i = numBits-1; i >= 0; i--) {
+        if (n & (1 << i)) { // if bit i is set
+            int flipped = n ^ (1 << i); // flip this bit
+            if(tmpSet.find(flipped) != tmpSet.end()){
+                return flipped;
+            }
+        }
+    }
+    return 0;
+}
+
+long long maxProduct(vector<int>& nums) {
+    set<int> tmpSet;
+    for(int it: nums){
+        tmpSet.insert(it);
+    }
+
+    long long maxP = INT_MIN;
+    sort(nums.begin(), nums.end());
+    reverse(nums.begin(), nums.end());
+    for(int i=0;i<nums.size();i++){
+        int xor_num = maxProduct_hlpr(nums[i], tmpSet);
+        if(xor_num*nums[i] > maxP){
+            maxP = xor_num*nums[i];
+        }
+    }
+    return (maxP == INT_MIN) ? 0 : maxP;
+}
+
+void solve(){
+    vector<int> nums = {1, 2, 3, 4, 5};
+    int target = 4;
+    int n = 5;
+    int low=0, high=n-1;
+    while(low <= high){
+        int mid = low + (high-low)/2;
+        if(nums[mid] == target){
+            cout<<mid<<"\n";
+            break;
+        }
+        // left half sorted
+        if(nums[low] <= nums[mid]){
+            if(nums[low]<=target && target<nums[mid]){
+                high = mid-1;
+            }
+            else{
+                low = mid+1;
+            }
+        }
+        // right half sorted
+        else{
+            if(nums[high]>=target && target>nums[mid]){
+                low = mid+1;
+            }
+            else{
+                high = mid-1;
+            }
+        }
+    }
+}
+
+int first_occurence(vector<int> &nums, int trg){
+    int n = nums.size();
+    int low = 0, high = n-1;
+    int ans = -1;
+
+    while(low<=high){
+        int mid = low + (high-low)/2;
+        if(nums[mid]<trg){
+            low = mid+1;
+        }
+        else if(nums[mid]>trg){
+            high = mid-1;
+        }
+        else{
+            ans = mid;
+            high = mid-1;
+        }
+    }
+    return ans;
+}
+
+int last_occurence(vector<int> &nums, int trg){
+    int n = nums.size();
+    int low = 0, high = n-1;
+    int ans = -1;
+
+    while(low<=high){
+        int mid = low + (high-low)/2;
+        if(nums[mid]<trg){
+            low = mid+1;
+        }
+        else if(nums[mid]>trg){
+            high = mid-1;
+        }
+        else{
+            ans = mid;
+            low = mid+1;
+        }
+    }
+    return ans;
+}
+
+string amazonQues(string shipmentData){
+    int n = shipmentData.size();
+
+    int ones = count(shipmentData.begin(), shipmentData.end(), '1');
+
+    vector<int> order;
+
+    // odd positions from end
+    for(int i = n - 1; i >= 0; i -= 2)
+        order.push_back(i);
+
+    // even positions
+    int start = (n % 2 == 0) ? 0 : 1;
+    for(int i = start; i < n; i += 2)
+        order.push_back(i);
+
+    vector<char> ans(n, '0');
+
+    for(int i = 0; i < ones; i++)
+        ans[order[i]] = '1';
+
+    return string(ans.begin(), ans.end());
+}
+
 int main(){
     
-    vector<int> par = {-1,2,0};
-    cout<<countHighestScoreNodes(par);
+    string ship = "1101";
+
+    cout<<amazonQues(ship);
 
     return 0;
 }
