@@ -470,6 +470,15 @@ Node* Summation(Node* num1, Node* num2){
     return ans->next;
 }
 
+Node* copyRandomList(Node* head) {
+    Node* demo;
+    Node* curr;
+    curr = head;
+    while(curr != nullptr){
+        demo->next = new Node(curr->getValue());
+    }
+}
+
 
 int main(){
     Node *head;
