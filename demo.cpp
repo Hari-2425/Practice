@@ -1,6 +1,25 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+class Node{
+    private:
+    
+    public:
+        int data;
+        Node *next;
+        Node(int x){
+            this->data = x;
+            this->next = NULL;
+        }
+        int getValue(){
+            return this->data;
+        }
+
+        Node* getNext(){
+            return this->next;
+        }
+};
+
 class Solution {
 public:
 
@@ -73,6 +92,8 @@ vector<int> productExceptSelf(vector<int>& nums) {
 
     return ans;
 }
+
+
 
 
 int main(){
