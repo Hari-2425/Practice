@@ -590,7 +590,7 @@ class Solution {
     }
 
     bool canFinish(int k, vector<int> &piles, int h){
-        for(int i=0;h>0 && i<piles.size();i++){
+        for(int i=0;i<piles.size();i++){
             h -= (piles[i]+k-1)/k;
         }
         return h>=0;
@@ -604,8 +604,9 @@ class Solution {
 
         // binary search approach
 
-        int l=1, r=1;
+        int l=INT_MAX, r=1;
         for(int p: piles){
+            l = min(l, p);
             r = max(p, r);
         }
 
@@ -626,7 +627,9 @@ class Solution {
 
     bool canSplit(vector<int> &nums, int kSum, int k){
         int sum=0;
-        int i=0, count=0;
+        int i=0, count=1;
+        
+        // 7,2,5,10,8  kSum=14,  k=2
         while(i < nums.size()){
             if(sum + nums[i] > kSum){
                 sum = 0;
@@ -636,19 +639,17 @@ class Solution {
                 sum += nums[i];
                 i++;
             }
-            if(count > k){
-                return false;
-            }
         }
-        return true;
+        return count<=k;
     }
 
     int splitArray(vector<int>& nums, int k) {
-        int l=INT_MAX, r=0, ans=-1;
+        int l=INT_MIN, r=0, ans=-1;
         // search range: [min_val, arr_sum]
+
         for(int num: nums){
             r += num;
-            l = min(l, num);
+            l = max(l, num);
         }
 
         while(l <= r){
@@ -662,6 +663,146 @@ class Solution {
             }
         }
         return ans;
+    }
+
+    bool canDivide(vector<int> &nums, int maxOps, int maxBalls){
+        int countOfOperations = 0;
+        for(int x: nums){
+            int ops = ceil((double)x/maxBalls)-1;
+            countOfOperations += ops;
+            if(countOfOperations > maxOps){
+                return false;
+            }
+        }
+        return countOfOperations <= maxOps;
+    }
+
+    int minimumSize(vector<int>& nums, int maxOperations) {
+        int n=nums.size();
+        int l=1;
+        int r=INT_MIN;
+        int ans = -1;
+
+        for(int x: nums){
+            r = max(r, x);
+        }
+
+        while(l <= r){
+            int mid = l + (r-l)/2;
+            if(canDivide(nums, maxOperations, mid)){
+                ans = mid;
+                r = mid-1;
+            }
+            else{
+                l = mid+1;
+            }
+        }
+        return ans;
+    }
+
+    
+
+    int openLock(vector<string>& deadends, string target) {
+        unordered_set<string> dead;
+        for(string d: deadends){
+            dead.insert(d);
+        }
+        unordered_set<string> vis;
+        queue<string> qu;
+        int moves = 0;
+
+        if(dead.count("0000")){
+            return -1;
+        }
+        qu.push("0000");
+        vis.insert("0000");
+
+        while(!qu.empty()){
+            int sz = qu.size();
+            while(sz--){
+
+                string curr = qu.front();
+                qu.pop();
+                if(curr == target){
+                    return moves;
+                }
+                
+                for(int i=0;i<4;i++){
+                    string temp1 = curr;
+                    string temp2 = curr;
+
+                    //forward
+                    if(curr[i]=='9'){
+                        temp1[i] = '0';
+                    }
+                    else{
+                        temp1[i] += 1;
+                    }
+                    if(!dead.count(temp1) && !vis.count(temp1)){
+                        qu.push(temp1);
+                        vis.insert(temp1);
+                    }
+
+                    //backward
+                    if(curr[i]=='0'){
+                        temp2[i] = '9';
+                    }
+                    else{
+                        temp2[i] -= 1;
+                    }
+                    if(!dead.count(temp2) && !vis.count(temp2)){
+                        qu.push(temp2);
+                        vis.insert(temp2);
+                    }
+                }
+            }
+            moves++;
+        }
+        return -1;
+    }
+
+    int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+        unordered_set<string> vis;
+        int n = wordList.size();
+        unordered_set<string> dict;
+        for(string word: wordList){
+            dict.insert(word);
+        }
+        int count = 0;
+        queue<string> qu;
+        qu.push(beginWord);
+        vis.insert(beginWord);
+        count++;
+
+        while(!qu.empty()){
+            int sz = qu.size();
+            
+            while(sz--){
+                string curr = qu.front();
+                qu.pop();
+                if(curr == endWord){
+                    return count;
+                }
+                for(int i=0;i<curr.size();i++){
+
+                    for(int j=0;j<26;j++){
+                        char ch = 'a'+j;
+                        if(ch == curr[i]){
+                            continue;
+                        }
+                        char o_char = curr[i];
+                        curr[i] = ch;
+                        if(!vis.count(curr) && dict.count(curr)){
+                            qu.push(curr);
+                            vis.insert(curr);
+                        }
+                        curr[i] = o_char;
+                    }
+                }
+            }
+            count++;
+        }
+        return 0;
     }
 };
 
@@ -736,9 +877,10 @@ int main(){
 
     Solution sol;
 
-    vector<int> nums = {7,2,5,10,8};
-    int k = 2;
-    cout<<sol.splitArray(nums, k);
+    string beginWord = "hit";
+    string endWord = "cog";
+    vector<string> wordList = {"hot","dot","dog","lot","log","cog"};
+    cout<<sol.ladderLength(beginWord, endWord, wordList);
 
 
     return 0;
